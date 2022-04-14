@@ -45,8 +45,8 @@ RUN_DATABASE='OFF'
 RUN_FILES='OFF'
 GEN_FILES='ON'
 
-PATTERN='^(h|hpp|c|cc|cpp|cxx)$'
-# assumption: CMake build directory is located in the root directory
+EXT_PATTERN='^(cpp|cxx|cc|c|h|hpp)$'
+# ASSUMPTION: CMake build directory is located in the root directory
 PATH_BUILD='../../_build'
 # dir names are extracted from PATH_BUILD by removing the rel part
 DIR_BUILD=
@@ -130,6 +130,13 @@ check_args() {
     # cd to root directory
     cd "${dir_rel}"
     DIR_ROOT=$(pwd)
+
+    echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+    echo "DIR_ROOT        : $DIR_ROOT"
+    echo "DIR_BUILD       : $DIR_BUILD"
+    echo "DIR_SCRIPT      : $DIR_SCRIPT"
+
+    ls -l
 
     if [[ "${RUN_DATABASE}" == 'ON' || "${RUN_FILES}" == 'ON' ]]
     then
@@ -365,7 +372,7 @@ run_clang_tidy_on_files() {
                 # if 1. the file is by its extension a C++-related one
                 #    2. its path does not contain any excluded directories
                 # then analyze it by clang-tidy
-                if [[ "${file_ext}" =~ $PATTERN ]]
+                if [[ "${file_ext}" =~ $EXT_PATTERN ]]
                 then
                     if is_excluded "${file_abs}"
                     then
