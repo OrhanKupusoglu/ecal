@@ -43,9 +43,9 @@ jobs:
       run: |
         export CC=/usr/bin/gcc-9
         export CXX=/usr/bin/g++-9
-        mkdir "${{ runner.workspace }}/_build"
-        cd "${{ runner.workspace }}/_build"
-        cmake $GITHUB_WORKSPACE -G "Ninja" \
+        mkdir "${{ runner.workspace }}/ecal/_build"
+        cd $_
+        cmake .. -G "Ninja" \
         -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
         -DHAS_HDF5=ON \
         -DHAS_QT5=ON \
@@ -85,36 +85,33 @@ jobs:
 
     - name: Build Release
       run: cmake --build . --config Release
-      working-directory: ${{ runner.workspace }}/_build
+      working-directory: ${{ runner.workspace }}/ecal/_build
 
     - name: Build Python Wheel
       run: cmake --build . --target create_python_wheel --config Release
-      working-directory: ${{ runner.workspace }}/_build
+      working-directory: ${{ runner.workspace }}/ecal/_build
 
     - name: Run Tests
       run: ctest -V
-      working-directory: ${{ runner.workspace }}/_build
+      working-directory: ${{ runner.workspace }}/ecal/_build
 
     - name: Pack
       run: cpack -G DEB
-      working-directory: ${{ runner.workspace }}/_build
+      working-directory: ${{ runner.workspace }}/ecal/_build
 
     - name: Upload Debian
       uses: actions/upload-artifact@v2
       with:
         name: ubuntu-debian
-        path: ${{ runner.workspace }}/_build/_deploy/*.deb
+        path: ${{ runner.workspace }}/ecal/_build/_deploy/*.deb
 
     - name: Upload Python Wheel
       uses: actions/upload-artifact@v2
       with:
         name: ubuntu-python-wheel
-        path: ${{ runner.workspace }}/_build/_deploy/*.whl
+        path: ${{ runner.workspace }}/ecal/_build/_deploy/*.whl
 
     #---------------------------------------------------------------------------
-
-    - name: Print dir list
-      run: cd ${{ runner.workspace }} && ls -al && echo && cd _build && ls -al
 
     # https://github.com/Ana06/get-changed-files
     - name: Detect the changeset
