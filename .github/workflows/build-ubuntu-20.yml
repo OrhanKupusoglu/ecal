@@ -17,7 +17,7 @@ jobs:
         sudo apt-get install ninja-build doxygen graphviz libcurl4-openssl-dev libprotobuf-dev libprotoc-dev protobuf-compiler libhdf5-dev qt5-default
         sudo apt-get install jq clang-tidy
 
-    - name: Install Cap’n Proto
+    - name: Install Cap'n Proto
       run: |
         mkdir "${{ runner.workspace }}/capnp"
         cd "${{ runner.workspace }}/capnp"
@@ -29,7 +29,7 @@ jobs:
         sudo make install
 
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         submodules:  'true'
         fetch-depth: 0
@@ -100,16 +100,25 @@ jobs:
       working-directory: ${{ runner.workspace }}/ecal/_build
 
     - name: Upload Debian
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ubuntu-debian
         path: ${{ runner.workspace }}/ecal/_build/_deploy/*.deb
 
     - name: Upload Python Wheel
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ubuntu-python-wheel
         path: ${{ runner.workspace }}/ecal/_build/_deploy/*.whl
+
+    #---------------------------------------------------------------------------
+
+    # https://github.com/actions/upload-artifact
+    - name: Upload the whole directory
+      uses: actions/upload-artifact@v3
+      with:
+        name: ecal-dir
+        path: ${{ runner.workspace }}/ecal/
 
     #---------------------------------------------------------------------------
 
