@@ -112,6 +112,7 @@ jobs:
   clang-tidy-scan:
     if: ${{ always() }}
     needs: [build-ubuntu]
+    runs-on: ubuntu-20.04
 
     steps:
       - name: Install dependencies
