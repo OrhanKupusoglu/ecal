@@ -229,7 +229,7 @@ filter_compile_commands() {
 
         # for protobuf generated source & header files, protoc is fast
         # if built with this script (-m) or built already (-a), then there is no need to call protoc
-        if [[ "${GEN_FILES}" == 'ON' ]
+        if [[ "${GEN_FILES}" == 'ON' ]]
         then
             run_protoc
         fi
