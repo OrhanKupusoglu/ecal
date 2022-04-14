@@ -127,16 +127,9 @@ check_args() {
     # cd to script's directory
     cd "${0%/*}"
     DIR_SCRIPT=$(pwd)
-    # cd to root directory
+    # cd to root directory: $DIR_ROOT == $GITHUB_WORKSPACE
     cd "${dir_rel}"
     DIR_ROOT=$(pwd)
-
-    echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
-    echo "DIR_ROOT        : $DIR_ROOT"
-    echo "DIR_BUILD       : $DIR_BUILD"
-    echo "DIR_SCRIPT      : $DIR_SCRIPT"
-
-    ls -l
 
     if [[ "${RUN_DATABASE}" == 'ON' || "${RUN_FILES}" == 'ON' ]]
     then

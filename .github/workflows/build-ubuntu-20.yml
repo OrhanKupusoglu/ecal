@@ -113,6 +113,9 @@ jobs:
 
     #---------------------------------------------------------------------------
 
+    - name: Print dir list
+      run: cd ${{ runner.workspace }} && ls -al && echo && cd _build && ls -al
+
     # https://github.com/Ana06/get-changed-files
     - name: Detect the changeset
       id: changed_files
