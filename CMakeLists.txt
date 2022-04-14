@@ -102,6 +102,7 @@ if(CMAKE_EXPORT_COMPILE_COMMANDS)
   # source is relative to the current source directory,
   # destination is relative to the current build directory
   file(COPY ./build_linux/clang-tidy/.clang-tidy DESTINATION .)
+  file(COPY ./build_linux/clang-tidy/.clang-tidy DESTINATION ../.)
 endif()
 
 # Normalize backslashes from Windows paths

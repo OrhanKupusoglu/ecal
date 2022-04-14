@@ -169,12 +169,12 @@ run_cmake() {
         cd "${DIR_BUILD}/"
 
         cmake .. ${DCMAKE_EXPORT_COMPILE_COMMANDS} \
-                ${DCMAKE_C_COMPILER} \
-                ${DCMAKE_CXX_COMPILER} \
-                -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
-                -DECAL_THIRDPARTY_BUILD_PROTOBUF=OFF \
-                -DECAL_THIRDPARTY_BUILD_CURL=OFF  \
-                -DECAL_THIRDPARTY_BUILD_HDF5=OFF
+                 ${DCMAKE_C_COMPILER} \
+                 ${DCMAKE_CXX_COMPILER} \
+                 -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
+                 -DECAL_THIRDPARTY_BUILD_PROTOBUF=OFF \
+                 -DECAL_THIRDPARTY_BUILD_CURL=OFF  \
+                 -DECAL_THIRDPARTY_BUILD_HDF5=OFF
     fi
 }
 
