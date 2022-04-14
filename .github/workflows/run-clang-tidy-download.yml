@@ -7,7 +7,7 @@ on:
       - master
 
 jobs:
-  needs: [build-ubuntu]
+  needs: build-ubuntu
   clang-tidy-scan:
     runs-on: ubuntu-20.04
 
