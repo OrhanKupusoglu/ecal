@@ -27,8 +27,7 @@ jobs:
 
       # https://github.com/actions/download-artifact
       - name: Download the built directory
-        - uses: actions/checkout@v3
-        - uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v3
           with:
             name: ecal-dir
 
