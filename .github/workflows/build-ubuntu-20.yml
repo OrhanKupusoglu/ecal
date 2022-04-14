@@ -109,12 +109,6 @@ jobs:
         name: ubuntu-python-wheel
         path: ${{ runner.workspace }}/_build/_deploy/*.whl
 
-  clang-tidy-scan:
-    if: ${{ always() }}
-    needs: [build-ubuntu]
-    runs-on: ubuntu-20.04
-
-    steps:
       - name: Install dependencies
         run: |
           sudo apt-get install jq clang-tidy
