@@ -28,8 +28,11 @@ jobs:
       # https://github.com/actions/download-artifact
       - name: Download the built directory
         uses: actions/download-artifact@v3
-          with:
-            name: ecal-dir
+        with:
+          name: ecal-dir.tar.gz
+
+      - name: Extract the tarball archive
+        run: tar -xzf ecal-dir.tar.gz
 
       # https://github.com/Ana06/get-changed-files
       - name: Detect the changeset
@@ -42,6 +45,7 @@ jobs:
         id: suffix
         run: |
           build_linux/clang-tidy/build.sh -f ${{ steps.changed_files.outputs.added_modified }}
+        working-directory: ${{ runner.workspace }}/ecal
 
       # https://github.com/actions/upload-artifact
       # If make or clang-tidy is never called, artifact upload will fail (no log files) with just a warning.
@@ -51,6 +55,7 @@ jobs:
           name: logs_${{ steps.suffix.outputs.timestamp }}
           path: _build/log_*.txt
           if-no-files-found: warn
+        working-directory: ${{ runner.workspace }}/ecal
 
       # https://github.com/mxschmitt/action-tmate#only-on-failure
       # To debug failures, use either the Web shell link or SSH to the address given on this step,

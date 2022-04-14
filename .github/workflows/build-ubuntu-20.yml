@@ -113,12 +113,15 @@ jobs:
 
     #---------------------------------------------------------------------------
 
+    - name: 'Create a tarball'
+      run: tar -czf ecal.tar.gz ${{ runner.workspace }}/ecal/
+
     # https://github.com/actions/upload-artifact
     - name: Upload the whole directory
       uses: actions/upload-artifact@v3
       with:
-        name: ecal-dir
-        path: ${{ runner.workspace }}/ecal/
+        name: ecal-dir.tar.gz
+        path: ${{ runner.workspace }}/ecal.tar.gz
 
     #---------------------------------------------------------------------------
 
