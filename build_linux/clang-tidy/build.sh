@@ -43,6 +43,7 @@ set -e
 RUN_MAKE='OFF'
 RUN_DATABASE='OFF'
 RUN_FILES='OFF'
+GEN_FILES='ON'
 
 PATTERN='^(h|hpp|c|cc|cpp|cxx)$'
 # assumption: CMake build directory is located in the root directory
@@ -73,7 +74,7 @@ DCMAKE_CXX_COMPILER=              #'-DCMAKE_CXX_COMPILER=/usr/bin/clang++-14'
 
 # ------------------------------------------------------------------------------
 
-USAGE="$(basename $0) [-h|-help] [-b|--build <build>] [-c|compiler <C> <CXX>] [-m|--make] [-i|--filter <app> <cfg>] [-d|--database] [-f|--files <files...>]
+USAGE="$(basename $0) [-h|-help] [-b|--build <build>] [-c|compiler <C> <CXX>] [-m|--make] [-i|--filter <app> <cfg>] [-d|--database] [-a|--already] [-f|--files <files...>]
 run cmake, and then optionally make and/or clang-tidy - where:
     -h | --help                 show this help message and exit
     -b | --build <build>        build path relative to this script, default: '${PATH_BUILD}'
@@ -81,6 +82,7 @@ run cmake, and then optionally make and/or clang-tidy - where:
     -m | --make                 run make
     -i | --filter <app> <cfg>   filtering app & its config rel. to this script or abs. paths, default: '${PATH_FILTER} ${PATH_EXC_CONFIG}'
     -d | --database             run clang-tidy on the compilation database
+    -a | --already              already built, all machine-generated codes are available
     -f | --files <files...>     run clang-tidy on the given files (remaining args)
 "
 
@@ -103,6 +105,8 @@ then
                                 PATH_FILTER="$2" ; PATH_EXC_CONFIG="$3" ;
                                 shift 3 ; if [[  $# -eq 0 ]];then break ; fi ;;
             -d | --database )   RUN_DATABASE='ON' ; shift ;
+                                if [[  $# -eq 0 ]];then break ; fi ;;
+            -a | --already )    GEN_FILES='OFF' ; shift ;
                                 if [[  $# -eq 0 ]];then break ; fi ;;
             -f | --files )      RUN_FILES='ON' ; shift ;
                                 if [[  $# -eq 0 ]];then echo "WARNING - missing file list" ; exit 0 ; fi ;
@@ -155,26 +159,29 @@ check_args() {
 }
 
 run_cmake() {
-    # run cmake always
-    echo "++ build type: ${CMAKE_BUILD_TYPE}"
-    echo -e "\n++ running cmake ..."
+    if [[ "${GEN_FILES}" == 'ON' ]]
+    then
+        echo "++ build type: ${CMAKE_BUILD_TYPE}"
+        echo -e "\n++ running cmake ..."
 
-    rm -rf "${DIR_BUILD}/"
-    mkdir ${DIR_BUILD}
-    cd "${DIR_BUILD}/"
+        rm -rf "${DIR_BUILD}/"
+        mkdir ${DIR_BUILD}
+        cd "${DIR_BUILD}/"
 
-    cmake .. ${DCMAKE_EXPORT_COMPILE_COMMANDS} \
-             ${DCMAKE_C_COMPILER} \
-             ${DCMAKE_CXX_COMPILER} \
-             -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
-             -DECAL_THIRDPARTY_BUILD_PROTOBUF=OFF \
-             -DECAL_THIRDPARTY_BUILD_CURL=OFF  \
-             -DECAL_THIRDPARTY_BUILD_HDF5=OFF
+        cmake .. ${DCMAKE_EXPORT_COMPILE_COMMANDS} \
+                ${DCMAKE_C_COMPILER} \
+                ${DCMAKE_CXX_COMPILER} \
+                -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} \
+                -DECAL_THIRDPARTY_BUILD_PROTOBUF=OFF \
+                -DECAL_THIRDPARTY_BUILD_CURL=OFF  \
+                -DECAL_THIRDPARTY_BUILD_HDF5=OFF
+    fi
 }
 
 run_make() {
     if [[ "${RUN_MAKE}" == 'ON' ]]
     then
+        GEN_FILES='OFF'
         local cmd="cmake --build . -- -j${NUM_INST}"
         echo -e "\n++ ${cmd} ...\nsee: ${FILE_MAKE_OUTPUT}"
         echo "${cmd}" >> ${FILE_MAKE_OUTPUT}
@@ -221,7 +228,8 @@ filter_compile_commands() {
         mv compile_commands_inc.json compile_commands.json
 
         # for protobuf generated source & header files, protoc is fast
-        if [[ "${RUN_MAKE}" != 'ON' ]]
+        # if built with this script (-m) or built already (-a), then there is no need to call protoc
+        if [[ "${GEN_FILES}" == 'ON' ]
         then
             run_protoc
         fi

@@ -15,6 +15,7 @@ jobs:
       run: |
         sudo apt update
         sudo apt-get install ninja-build doxygen graphviz libcurl4-openssl-dev libprotobuf-dev libprotoc-dev protobuf-compiler libhdf5-dev qt5-default
+        sudo apt-get install jq clang-tidy
 
     - name: Install Cap’n Proto
       run: |
@@ -109,29 +110,21 @@ jobs:
         name: ubuntu-python-wheel
         path: ${{ runner.workspace }}/_build/_deploy/*.whl
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get install jq clang-tidy
-
-    - name: Display version info
-      run: |
-        echo $(g++ --version)
-        echo $(clang --version)
-        echo $(cmake --version)
-        echo $(clang-tidy --version)
+    #---------------------------------------------------------------------------
 
     # https://github.com/Ana06/get-changed-files
     - name: Detect the changeset
       id: changed_files
       uses: Ana06/get-changed-files@v2.1.0
 
+    # see_ ./build.sh --help
     - name: Run clang-tidy on the changeset
       id: suffix
       run: |
-        build_linux/clang-tidy/build.sh -f ${{ steps.changed_files.outputs.added_modified }}
+        build_linux/clang-tidy/build.sh -a -f ${{ steps.changed_files.outputs.added_modified }}
 
     # https://github.com/actions/upload-artifact
-    # if make or clang-tidy is never called, artifact upload will fail (no log files) with a warning.
+    # If clang-tidy is never called, artifact upload will fail (no log files) with a warning.
     - name: Archive logs as artifact
       uses: actions/upload-artifact@v3
       with:

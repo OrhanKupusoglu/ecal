@@ -9,6 +9,7 @@ on:
       - '**.c'
       - '**.h'
       - '**.hpp'
+      - '**/CMakeLists.txt'
   pull_request:
     branches:
       - master
@@ -42,13 +43,14 @@ jobs:
         id: changed_files
         uses: Ana06/get-changed-files@v2.1.0
 
+      # see_ ./build.sh --help
       - name: Run clang-tidy on the changeset
         id: suffix
         run: |
           build_linux/clang-tidy/build.sh -f ${{ steps.changed_files.outputs.added_modified }}
 
       # https://github.com/actions/upload-artifact
-      # if make or clang-tidy is never called, artifact upload will fail (no log files) with a warning.
+      # If make or clang-tidy is never called, artifact upload will fail (no log files) with a warning.
       - name: Archive logs as artifact
         uses: actions/upload-artifact@v3
         with:
