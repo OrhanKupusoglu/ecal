@@ -114,7 +114,7 @@ jobs:
     #---------------------------------------------------------------------------
 
     - name: 'Create a tarball'
-      run: cd ${{ runner.workspace }} && tar -czf ecal.tar.gz ${{ runner.workspace }}/ecal/
+      run: cd ${{ runner.workspace }} && tar -czf -C ecal.tar.gz ecal/
 
     # https://github.com/actions/upload-artifact
     - name: Upload the whole directory

@@ -8,7 +8,7 @@ on:
       - completed
 
 jobs:
-  clang-tidy-scan:
+  clang-tidy-scan-download:
     runs-on: ubuntu-20.04
 
     steps:
