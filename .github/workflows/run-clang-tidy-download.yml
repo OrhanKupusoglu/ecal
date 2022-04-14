@@ -1,13 +1,13 @@
 name: Run clang-tidy after download
 
+# Only trigger, when the build workflow succeeded
 on:
-  push:
-  pull_request:
-    branches:
-      - master
+  workflow_run:
+    workflows: ["Build Ubuntu 20.04"]
+    types:
+      - completed
 
 jobs:
-  needs: build-ubuntu
   clang-tidy-scan:
     runs-on: ubuntu-20.04
 
