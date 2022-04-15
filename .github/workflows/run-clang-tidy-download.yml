@@ -1,11 +1,7 @@
 name: Run clang-tidy after download
 
-# Only trigger, when the build workflow succeeded
 on:
-  workflow_run:
-    workflows: ["Build Ubuntu 20.04"]
-    types:
-      - completed
+  workflow_call:
 
 jobs:
   clang-tidy-scan-download:
@@ -32,20 +28,18 @@ jobs:
           name: ecal-dir.tar.gz
 
       - name: Extract the tarball archive
-        run: tar -xzf ecal-dir.tar.gz
+        run: tar -xzf ecal.tar.gz && cd ecal
 
       # https://github.com/Ana06/get-changed-files
       - name: Detect the changeset
         id: changed_files
         uses: Ana06/get-changed-files@v2.1.0
-        working-directory: ${{ runner.workspace }}/ecal
 
       # see: ./build.sh --help
       - name: Run clang-tidy on the changeset
         id: suffix
         run: |
-          build_linux/clang-tidy/build.sh -f ${{ steps.changed_files.outputs.added_modified }}
-        working-directory: ${{ runner.workspace }}/ecal
+          cd ecal && build_linux/clang-tidy/build.sh -a -f ${{ steps.changed_files.outputs.added_modified }}
 
       # https://github.com/actions/upload-artifact
       # If make or clang-tidy is never called, artifact upload will fail (no log files) with just a warning.
@@ -55,7 +49,6 @@ jobs:
           name: logs_${{ steps.suffix.outputs.timestamp }}
           path: _build/log_*.txt
           if-no-files-found: warn
-        working-directory: ${{ runner.workspace }}/ecal
 
       # https://github.com/mxschmitt/action-tmate#only-on-failure
       # To debug failures, use either the Web shell link or SSH to the address given on this step,

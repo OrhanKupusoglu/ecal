@@ -154,3 +154,9 @@ jobs:
       uses: mxschmitt/action-tmate@v3.11
       with:
         sudo: true
+
+  #---------------------------------------------------------------------------
+
+  call-clang-tidy-download:
+    needs: build-ubuntu
+    uses: ./.github/workflows/run-clang-tidy-download.yml
