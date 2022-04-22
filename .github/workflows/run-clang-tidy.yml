@@ -19,44 +19,28 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install ninja-build doxygen graphviz libcurl4-openssl-dev libprotobuf-dev libprotoc-dev protobuf-compiler libhdf5-dev qt5-default
-          sudo apt-get install clang-tidy
-
-      - name: Display version info
-        run: |
-          echo $(g++ --version)
-          echo $(clang --version)
-          echo $(cmake --version)
-          echo $(clang-tidy --version)
-
       - name: Checkout
         uses: actions/checkout@v3
         with:
           submodules: 'true'
           fetch-depth: 0
 
-      # https://github.com/Ana06/get-changed-files
-      - name: Detect the changeset
-        id: changed_files
-        uses: Ana06/get-changed-files@v2.1.0
-
       # see: ./build.sh --help
-      - name: Run clang-tidy on the changeset
+      - name: Generate files
         id: suffix
         run: |
-          build_linux/clang-tidy/build.sh -f ${{ steps.changed_files.outputs.added_modified }}
+          build_linux/clang-tidy/build.sh
 
-      # https://github.com/actions/upload-artifact
-      # If make or clang-tidy is never called, artifact upload will fail (no log files) with just a warning.
-      - name: Archive logs as artifact
-        uses: actions/upload-artifact@v3
+      - name: clang-tidy review
+        uses: ZedThree/clang-tidy-review@v0.7.1
+        id: review
         with:
-          name: logs_${{ steps.suffix.outputs.timestamp }}
-          path: _build/log_*.txt
-          if-no-files-found: warn
+          # List of packages to install
+          apt_packages: |
+            install, ninja-build, doxygen, graphviz, libcurl4-openssl-dev, libprotobuf-dev, libprotoc-dev, protobuf-compiler, libhdf5-dev, qt5-default, jq
+          build_dir: ${GITHUB_WORKSPACE}/_build
+          exclude: ${GITHUB_WORKSPACE}/_build/*, ${GITHUB_WORKSPACE}/thirdparty/*
+          max_comments: 100
 
       # https://github.com/mxschmitt/action-tmate#only-on-failure
       # To debug failures, use either the Web shell link or SSH to the address given on this step,
