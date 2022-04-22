@@ -5,15 +5,15 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
+ * CLANG-TIDY TEST
  * ========================= eCAL LICENSE =================================
 */
 
@@ -416,7 +416,7 @@ namespace eCAL
     {
       use_inproc = TLayer::smode_off;
     }
-    
+
     // shared memory transport is on and
     // inner process transport is on
     // let's check if there is a need for
@@ -432,7 +432,7 @@ namespace eCAL
         // we have no external subscriptions,
         // but we have local ones (otherwise we would have
         // no subscriptions and this is checked with !IsSubscribed())
-        // so let's check if all local subscriptions are 
+        // so let's check if all local subscriptions are
         // "inner process only", that means
         // they have all our process id
         if (IsInternalSubscribedOnly())
@@ -517,7 +517,7 @@ namespace eCAL
       // log it
       Logging::Log(log_level_debug3, m_topic_name + "::CDataWriter::Send::SHM");
 #endif
-     
+
       // send it
       bool shm_sent(false);
       {
