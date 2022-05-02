@@ -27,7 +27,7 @@ jobs:
         with:
           name: ecal-dir.zip
 
-      # reduce directory depth
+      # replace the working directory
       - name: Extract the tarball archive
         run: mv ecal.tar.gz ../. && cd .. && rm -rf ecal && tar -xzf ecal.tar.gz && cd ecal
 
@@ -47,7 +47,7 @@ jobs:
       - name: Archive logs as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: logs_${{ steps.suffix.outputs.timestamp }}
+          name: clang_tidy_logs_${{ steps.suffix.outputs.timestamp }}
           path: ~/work/ecal/_build/log_*.txt
           if-no-files-found: warn
 
