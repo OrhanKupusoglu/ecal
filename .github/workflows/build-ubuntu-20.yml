@@ -116,8 +116,7 @@ jobs:
     # https://www.gnu.org/software/tar/manual/html_node/exclude.html
     - name: 'Create a tarball'
       run: |
-        cd ${{ runner.workspace }} && tar --exclude-vcs \
-                                          --exclude-vcs-ignore \
+        cd ${{ runner.workspace }} && tar --exclude-vcs-ignore \
                                           --exclude='bin' \
                                           --exclude='doc' \
                                           --exclude='_build/_deploy' \
@@ -126,6 +125,7 @@ jobs:
                                           --exclude='*.a' \
                                           --exclude='*.o' \
                                           --exclude='*.so' \
+                                          --exclude=ecal-2/.git/* \
                                           -czf ecal.tar.gz ecal/ _build/
 
     # https://github.com/actions/upload-artifact
