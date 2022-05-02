@@ -114,6 +114,7 @@ jobs:
 
     # GNU tar - Excluding Some Files
     # https://www.gnu.org/software/tar/manual/html_node/exclude.html
+    # the emtpy '.git/' drectory is required, it marks the root directory
     - name: 'Create a tarball'
       run: |
         cd ${{ runner.workspace }} && tar --exclude-vcs-ignore \
