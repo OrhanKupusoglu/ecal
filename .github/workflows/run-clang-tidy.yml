@@ -54,7 +54,7 @@ jobs:
       - name: Archive logs as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: logs_${{ steps.suffix.outputs.timestamp }}
+          name: clang_tidy_log_${{ steps.suffix.outputs.timestamp }}
           path: _build/clang_tidy_log_*.txt
           if-no-files-found: warn
 
