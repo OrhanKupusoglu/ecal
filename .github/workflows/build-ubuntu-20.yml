@@ -115,17 +115,17 @@ jobs:
     # GNU tar - Excluding Some Files
     # https://www.gnu.org/software/tar/manual/html_node/exclude.html
     - name: 'Create a tarball'
-      run: >
-        cd ${{ runner.workspace }} && tar --exclude-vcs
-                                          --exclude-vcs-ignore
-                                          --exclude='bin'
-                                          --exclude='doc'
-                                          --exclude='_build/_deploy'
-                                          --exclude='_build/_CPack_Packages'
-                                          --exclude='*.deb'
-                                          --exclude='*.a'
-                                          --exclude='*.o'
-                                          --exclude='*.so'
+      run: |
+        cd ${{ runner.workspace }} && tar --exclude-vcs \
+                                          --exclude-vcs-ignore \
+                                          --exclude='bin' \
+                                          --exclude='doc' \
+                                          --exclude='_build/_deploy' \
+                                          --exclude='_build/_CPack_Packages' \
+                                          --exclude='*.deb' \
+                                          --exclude='*.a' \
+                                          --exclude='*.o' \
+                                          --exclude='*.so' \
                                           -czf ecal.tar.gz ecal/ _build/
 
     # https://github.com/actions/upload-artifact
