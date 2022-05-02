@@ -120,8 +120,10 @@ jobs:
         cd ${{ runner.workspace }} && tar --exclude-vcs-ignore \
                                           --exclude='bin' \
                                           --exclude='doc' \
-                                          --exclude='_build/_deploy' \
                                           --exclude='_build/_CPack_Packages' \
+                                          --exclude='_build/_deploy' \
+                                          --exclude='_build/lib' \
+                                          --exclude='_build/python' \
                                           --exclude='*.deb' \
                                           --exclude='*.a' \
                                           --exclude='*.o' \
