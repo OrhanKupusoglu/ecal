@@ -54,12 +54,11 @@ jobs:
       - name: Detect number of clang-tidy warnings
         id: num_warnings
         run: |
+          NUM_WARNINGS=0
           NUM_LOG_FILES=$(ls ~/work/ecal/_build/clang_tidy_log_*.txt 2> /dev/null | wc -l)
           if [[ ${NUM_LOG_FILES} -gt 0 ]]
           then
             NUM_WARNINGS=$(grep -oE "\w+\.\w+:\w+:\w+:\s?warning:\s?.*" -- ~/work/ecal/_build/clang_tidy_log_*.txt | wc -l)
-          else
-            NUM_WARNINGS=0
           fi
           echo "::set-output name=value::${NUM_WARNINGS}"
 
