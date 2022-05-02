@@ -51,34 +51,22 @@ jobs:
           path: ~/work/ecal/_build/clang_tidy_log_*.txt
           if-no-files-found: warn
 
-      # fail if at least a warning has been found
-      # - name: Check clang-tidy warnings
-      #   run: |
-      #     NUM_WARNINGS=$(grep -oE "\w+\.\w+:\w+:\w+:\s?warning:\s?.*" -- ~/work/ecal/_build/clang_tidy_log_*.txt | wc -l)
-      #     if [[ ${NUM_WARNINGS} -gt 0 ]]
-      #     then
-      #       exit 1
-      #     fi
-
       - name: Detect number of clang-tidy warnings
         id: num_warnings
         run: |
-          NUM_WARNINGS=$(grep -oE "\w+\.\w+:\w+:\w+:\s?warning:\s?.*" -- ~/work/ecal/_build/clang_tidy_log_*.txt | wc -l)
+          NUM_LOG_FILES=$(ls ~/work/ecal/_build/clang_tidy_log_*.txt 2> /dev/null | wc -l)
+          if [[ ${NUM_LOG_FILES} -gt 0 ]]
+          then
+            NUM_WARNINGS=$(grep -oE "\w+\.\w+:\w+:\w+:\s?warning:\s?.*" -- ~/work/ecal/_build/clang_tidy_log_*.txt | wc -l)
+          else
+            NUM_WARNINGS=0
+          fi
           echo "::set-output name=value::${NUM_WARNINGS}"
 
       - name: Check clang-tidy warnings
+        continue-on-error: true
         if: ${{ steps.num_warnings.outputs.value > 0 }}
         uses: actions/github-script@v6
         with:
           script: |
               core.setFailed('Number of clang-tidy warnings is ${{ steps.num_warnings.outputs.value}}')
-
-      # https://github.com/mxschmitt/action-tmate#only-on-failure
-      # To debug failures, use either the Web shell link or SSH to the address given on this step,
-      # and press 'Q' or 'Ctrl+C' to continue.
-      # - name: Setup SSH session
-      #   if: ${{ always() }}
-      #   #if: ${{ failure() }}
-      #   uses: mxschmitt/action-tmate@v3.11
-      #   with:
-      #     sudo: true
