@@ -57,8 +57,8 @@ PATH_EXC_CONFIG='excludes_clang_tidy.json'
 CMAKE_BUILD_TYPE='Release'
 NUM_INST=4
 DATE_TIME=$(date +"%Y-%m-%d_%H-%M-%S")
-FILE_MAKE_OUTPUT="log_make_${DATE_TIME}.txt"
-FILE_CLANG_TIDY_OUTPUT="log_clang_tidy_${DATE_TIME}.txt"
+FILE_MAKE_OUTPUT="make_log_${DATE_TIME}.txt"
+FILE_CLANG_TIDY_OUTPUT="clang_tidy_log__${DATE_TIME}.txt"
 FILE_CLANG_TIDY_CONFIG='config_clang_tidy.yml'
 # optionally specify with version number, for example: 'clang-tidy-14'
 CLANG_TIDY='clang-tidy'

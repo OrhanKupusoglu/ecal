@@ -47,9 +47,18 @@ jobs:
       - name: Archive logs as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: clang_tidy_logs_${{ steps.suffix.outputs.timestamp }}
-          path: ~/work/ecal/_build/log_*.txt
+          name: clang_tidy_log__${{ steps.suffix.outputs.timestamp }}
+          path: ~/work/ecal/_build/clang_tidy_log__*.txt
           if-no-files-found: warn
+
+      # fail if at least a warning has been found
+      - name: Check warnings
+        run: |
+          NUM_WARNINGS=$(grep -oE "\w+\.\w+:\w+:\w+:\s?warning:\s?.*" -- ~/work/ecal/_build/clang_tidy_log_*.txt | wc -l)
+          if [[ ${NUM_WARNINGS} -gt 0 ]]
+          then
+            exit 1
+          fi
 
       # https://github.com/mxschmitt/action-tmate#only-on-failure
       # To debug failures, use either the Web shell link or SSH to the address given on this step,
