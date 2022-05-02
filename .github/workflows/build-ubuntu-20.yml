@@ -126,16 +126,16 @@ jobs:
                                           --exclude='*.a' \
                                           --exclude='*.o' \
                                           --exclude='*.so' \
-                                          --exclude=ecal-2/.git/* \
+                                          --exclude=ecal/.git/* \
                                           -czf ecal.tar.gz ecal/ _build/
 
     # https://github.com/actions/upload-artifact
     - name: Upload the whole directory
       uses: actions/upload-artifact@v3
       with:
-        name: ecal-dir.zip
+        name: ecal-dir
         path: ${{ runner.workspace }}/ecal.tar.gz
 
-  call-clang-tidy-download:
+  call-clang-tidy:
     needs: build-ubuntu
-    uses: ./.github/workflows/run-clang-tidy-download.yml
+    uses: ./.github/workflows/run-clang-tidy.yml
