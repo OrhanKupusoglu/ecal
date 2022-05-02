@@ -64,8 +64,8 @@ jobs:
       # To debug failures, use either the Web shell link or SSH to the address given on this step,
       # and press 'Q' or 'Ctrl+C' to continue.
       - name: Setup SSH session
-        #if: ${{ always() }}
-        if: ${{ failure() }}
+        if: ${{ always() }}
+        #if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3.11
         with:
           sudo: true
