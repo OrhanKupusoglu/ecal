@@ -47,7 +47,7 @@ RUN_DATABASE='OFF'
 RUN_FILES='OFF'
 GEN_FILES='ON'
 
-EXT_PATTERN='^(cpp|cxx|cc|c|h|hh|hxx|hpp)$'
+EXT_PATTERN='^(cpp|cppm|ixx|cxx|cc|c|h|hh|hxx|hpp)$'
 PATH_BUILD='../../_build'
 DIR_BUILD=
 DIR_SCRIPT=
