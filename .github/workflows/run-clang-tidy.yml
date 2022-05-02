@@ -55,7 +55,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: logs_${{ steps.suffix.outputs.timestamp }}
-          path: _build/log_*.txt
+          path: _build/clang_tidy_log_*.txt
           if-no-files-found: warn
 
       # https://github.com/mxschmitt/action-tmate#only-on-failure
