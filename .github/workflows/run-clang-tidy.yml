@@ -69,4 +69,4 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-              core.setFailed('number of clang-tidy warnings: ${{ steps.num_warnings.outputs.value}}')
+            core.setFailed('number of clang-tidy warnings: ${{ steps.num_warnings.outputs.value}}')
