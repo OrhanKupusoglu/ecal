@@ -4,7 +4,7 @@ on:
   workflow_call:
 
 jobs:
-  clang-tidy-scan-download:
+  clang-tidy-scan:
     runs-on: ubuntu-20.04
 
     steps:
