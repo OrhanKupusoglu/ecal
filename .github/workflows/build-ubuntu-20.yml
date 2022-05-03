@@ -117,19 +117,22 @@ jobs:
     # the emtpy '.git/' drectory is required, it marks the root directory
     - name: 'Create a tarball'
       run: |
-        cd ${{ runner.workspace }} && tar --exclude-vcs-ignore \
-                                          --exclude='bin' \
-                                          --exclude='doc' \
-                                          --exclude='_build/_CPack_Packages' \
-                                          --exclude='_build/_deploy' \
-                                          --exclude='_build/lib' \
-                                          --exclude='_build/python' \
-                                          --exclude='*.deb' \
-                                          --exclude='*.a' \
-                                          --exclude='*.o' \
-                                          --exclude='*.so' \
-                                          --exclude=ecal/.git/* \
-                                          -czf ecal.tar.gz ecal/ _build/
+        cd ${{ runner.workspace }}
+        tar --exclude-vcs-ignore \
+            --exclude='bin' \
+            --exclude='doc' \
+            --exclude='_build/_CPack_Packages' \
+            --exclude='_build/_deploy' \
+            --exclude='_build/lib' \
+            --exclude='_build/python' \
+            --exclude='*.deb' \
+            --exclude='*.a' \
+            --exclude='*.o' \
+            --exclude='*.so' \
+            --exclude=ecal/.git/* \
+            -czf ecal.tar.gz ecal/ _build/
+        du -sh ecal.tar.gz
+
 
     # https://github.com/actions/upload-artifact
     - name: Upload the whole directory
