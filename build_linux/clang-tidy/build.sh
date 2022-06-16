@@ -145,7 +145,7 @@ check_args() {
     local root_dir_git
     local path_clang_tidy
 
-    DIR_BUILD_NAME=${PATH_BUILD#$dir_rel/}
+    DIR_BUILD_NAME=${PATH_BUILD#${dir_rel}/}
     cd "${dir_rel}"
     DIR_BUILD_ROOT=$(pwd)
     DIR_BUILD="${DIR_BUILD_ROOT}/${DIR_BUILD_NAME}"
@@ -159,9 +159,9 @@ check_args() {
     if [[ "${RUN_DATABASE}" == 'ON' || "${RUN_FILES}" == 'ON' ]]
     then
         set +e
-        path_clang_tidy=$(command -v ${CLANG_TIDY})
+        path_clang_tidy=$(command -v "${CLANG_TIDY}")
         set -e
-        if [[ -z ${path_clang_tidy} ]]
+        if [[ -z "${path_clang_tidy}" ]]
         then
             echo -e "FATAL: ${CLANG_TIDY} is not available"
             exit 1
@@ -249,7 +249,7 @@ filter_compile_commands() {
 
         cp -a "${DIR_ROOT}/.clang-tidy" "${DIR_BUILD}"
         cd "${DIR_BUILD}"
-        ${CLANG_TIDY} --dump-config > ${FILE_CLANG_TIDY_CONFIG}
+        ${CLANG_TIDY} --dump-config > "${FILE_CLANG_TIDY_CONFIG}"
 
         # use the included commands as compile commands
         mv compile_commands.json compile_commands_orig.json
@@ -291,16 +291,16 @@ read_config_basic() {
     local subdir
 
     cd "${DIR_SCRIPT}"
-    if [[ -f "$PATH_EXC_CONFIG" ]]
+    if [[ -f "${PATH_EXC_CONFIG}" ]]
     then
-        line_count=$(wc -l < "$PATH_EXC_CONFIG")
+        line_count=$(wc -l < "${PATH_EXC_CONFIG}")
         if [[ "${line_count}" -gt "1" ]]
         then
             declare -a exc_dirs
             while IFS= read -r line
             do
-                exc_dirs[${#exc_dirs[@]}]="$line"
-            done < "$PATH_EXC_CONFIG"
+                exc_dirs[${#exc_dirs[@]}]="${line}"
+            done < "${PATH_EXC_CONFIG}"
             # eliminate the first and the last element, '[' and ']' respectively
             unset 'exc_dirs[0]'
             unset 'exc_dirs[-1]'
@@ -332,12 +332,12 @@ read_config() {
     set +e
     path_jq=$(command -v jq)
     set -e
-    if [[ -z ${path_jq} ]]
+    if [[ -z "${path_jq}" ]]
     then
         echo -e "WARNING: 'jq' is not available, fallig back to the simple Bash JSON parser"
         read_config_basic
     else
-        if [[ -f "$PATH_EXC_CONFIG" ]]
+        if [[ -f "${PATH_EXC_CONFIG}" ]]
         then
             for row in $(jq -c '.[]' < "${PATH_EXC_CONFIG}")
             do
@@ -391,7 +391,7 @@ run_clang_tidy_on_files() {
             file_abs="${file}"
             file_char="${file_abs:0:1}"
 
-            if [[ ${file_char} != '/' ]]
+            if [[ "${file_char}" != '/' ]]
             then
                 file_abs="${DIR_ROOT}/${file}"
             fi
