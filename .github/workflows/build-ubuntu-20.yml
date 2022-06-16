@@ -140,6 +140,17 @@ jobs:
 
     #---------------------------------------------------------------------------
 
+    - name: 'Detect the change-set'
+      run: |
+        cd ${{ runner.workspace }}/ecal
+        OLDREF=${{ github.event.pull_request.base.sha }}
+        NEWREF=${{ github.event.pull_request.head.sha }}
+        # https://git-scm.com/docs/git-diff
+        # ACMRT = Added (A), Copied (C), Modified (M), Renamed (R), Type changed (T)
+        git diff --stat --name-only --diff-filter=ACMRT "${OLDREF}..${NEWREF}" > _diff_check.txt
+        # DUXB = Deleted (D), Unmerged (U), Unknown (X), Broken (B)
+        git diff --stat --name-only --diff-filter=DUXB "${OLDREF}..${NEWREF}" > _diff_other.txt
+
     # GNU tar - Excluding Some Files
     # https://www.gnu.org/software/tar/manual/html_node/exclude.html
     # the emtpy '.git/' drectory is required, it marks the root directory
@@ -160,7 +171,6 @@ jobs:
             --exclude=ecal/.git/* \
             -czf ecal.tar.gz ecal/ _build/
         du -sh ecal.tar.gz
-
 
     # https://github.com/actions/upload-artifact
     - name: Upload the whole directory
