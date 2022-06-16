@@ -141,7 +141,7 @@ jobs:
     #---------------------------------------------------------------------------
 
     - name: 'Detect the change-set'
-      if: github.event_name == 'pull_request'
+      if: ${{ github.event_name == 'pull_request' }}
       run: |
         cd ${{ runner.workspace }}/ecal
         OLDREF=${{ github.event.pull_request.base.sha }}
@@ -181,6 +181,6 @@ jobs:
         path: ${{ runner.workspace }}/ecal.tar.gz
 
   call-clang-tidy:
-    if: github.event_name == 'pull_request'
+    if: ${{ github.event_name == 'pull_request' }}
     needs: build-ubuntu
     uses: ./.github/workflows/run-clang-tidy.yml
