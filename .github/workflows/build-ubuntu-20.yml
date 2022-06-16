@@ -141,6 +141,7 @@ jobs:
     #---------------------------------------------------------------------------
 
     - name: 'Detect the change-set'
+      if: github.event_name == 'pull_request'
       run: |
         cd ${{ runner.workspace }}/ecal
         OLDREF=${{ github.event.pull_request.base.sha }}
