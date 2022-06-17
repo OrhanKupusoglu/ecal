@@ -178,7 +178,7 @@ jobs:
         RUN_ANALYSIS: toJSON(${RUN_ANALYSIS})
 
     - name: 'Check for clang-tidy'
-      if: ${{ ! fromJSON(env.RUN_ANALYSIS) }}
+      if: ${{ ! env.RUN_ANALYSIS) }}
       uses: actions/github-script@v6
       with:
         script: |
