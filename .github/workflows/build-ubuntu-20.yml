@@ -176,10 +176,10 @@ jobs:
           cat _diff_other.txt
         fi
 
-        echo "::set-output name=value::${RUN_ANALYSIS}"
+        echo "::set-output name=value::${{ toJSON('${{ RUN_ANALYSIS }}') }}"
 
     - name: 'Check for clang-tidy'
-      if: ${{ !steps.run_analysis.outputs.value }}
+      if: ${{ !fromJSON(steps.run_analysis.outputs.value) }}
       uses: actions/github-script@v6
       with:
         script: |
