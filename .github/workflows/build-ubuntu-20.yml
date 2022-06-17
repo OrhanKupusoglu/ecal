@@ -144,7 +144,6 @@ jobs:
     #---------------------------------------------------------------------------
 
     - name: 'Detect the changeset'
-      id: run_analysis
       run: |
         cd ${{ runner.workspace }}/ecal
 
@@ -175,11 +174,11 @@ jobs:
           git diff --stat --name-only --diff-filter=DUXB "${OLD_REF}..${NEW_REF}" > _diff_other.txt
           cat _diff_other.txt
         fi
-
-        echo "::set-output name=value::${{ toJSON('${{ RUN_ANALYSIS }}') }}"
+      env:
+        RUN_ANALYSIS: ${RUN_ANALYSIS}
 
     - name: 'Check for clang-tidy'
-      if: ${{ !fromJSON(steps.run_analysis.outputs.value) }}
+      if: ${{ ! env.RUN_ANALYSIS }}
       uses: actions/github-script@v6
       with:
         script: |
