@@ -147,7 +147,7 @@ jobs:
       run: |
         cd ${{ runner.workspace }}/ecal
 
-        RUN_ANALYSIS=false
+        RUN_ANALYSIS='false'
         SHA_NULL='0000000000000000000000000000000000000000'
 
         if [[ ${{ github.event_name }} == 'pull_request' ]]
@@ -175,10 +175,10 @@ jobs:
           cat _diff_other.txt
         fi
       env:
-        RUN_ANALYSIS: toJSON(${RUN_ANALYSIS})
+        RUN_ANALYSIS: ${RUN_ANALYSIS}
 
     - name: 'Check for clang-tidy'
-      if: ${{ ! env.RUN_ANALYSIS }}
+      if: ${{ env.RUN_ANALYSIS == 'false' }}
       uses: actions/github-script@v6
       with:
         script: |
