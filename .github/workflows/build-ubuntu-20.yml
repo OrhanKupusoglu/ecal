@@ -5,6 +5,9 @@ on:
   pull_request:
     branches:
       - master
+    types:
+      - opened
+      - reopened
 
 jobs:
   build-ubuntu:
@@ -141,16 +144,23 @@ jobs:
     #---------------------------------------------------------------------------
 
     - name: 'Detect the change-set'
-      if: ${{ github.event_name == 'pull_request' }}
       run: |
         cd ${{ runner.workspace }}/ecal
-        OLDREF=${{ github.event.pull_request.base.sha }}
-        NEWREF=${{ github.event.pull_request.head.sha }}
+        FORK_BRANCH=$(git show-branch | grep '*' | grep -v "$(git rev-parse --abbrev-ref HEAD)" | head -n1 | sed 's/.*\[\(.*\)\].*/\1/' | sed 's/[\^~].*//')
+        FORK_HASH=$(git cherry ${FORK_BRANCH} | head -1)
+        OLDREF=${FORK_HASH:2}
+        NEWREF='HEAD'
+        echo "branch forked from branch: ${FORK_BRANCH}"
+        echo "branch forked from commit: ${FORK_HASH}"
+        echo "oldref: ${OLDREF}"
+        echo "newref: ${NEWREF}"
         # https://git-scm.com/docs/git-diff
         # ACMRT = Added (A), Copied (C), Modified (M), Renamed (R), Type changed (T)
         git diff --stat --name-only --diff-filter=ACMRT "${OLDREF}..${NEWREF}" > _diff_check.txt
+        git diff --stat --name-only --diff-filter=ACMRT "${OLDREF}..${NEWREF}"
         # DUXB = Deleted (D), Unmerged (U), Unknown (X), Broken (B)
         git diff --stat --name-only --diff-filter=DUXB "${OLDREF}..${NEWREF}" > _diff_other.txt
+        git diff --stat --name-only --diff-filter=DUXB "${OLDREF}..${NEWREF}"
 
     # GNU tar - Excluding Some Files
     # https://www.gnu.org/software/tar/manual/html_node/exclude.html
@@ -181,6 +191,5 @@ jobs:
         path: ${{ runner.workspace }}/ecal.tar.gz
 
   call-clang-tidy:
-    if: ${{ github.event_name == 'pull_request' }}
     needs: build-ubuntu
     uses: ./.github/workflows/run-clang-tidy.yml
