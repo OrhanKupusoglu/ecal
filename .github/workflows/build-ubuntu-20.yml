@@ -146,9 +146,16 @@ jobs:
     - name: 'Detect the change-set'
       run: |
         cd ${{ runner.workspace }}/ecal
+
+        echo
         pwd
+        echo
         ls -l
+        echo
         git branch -l
+        echo
+        git branch -al
+
         FORK_BRANCH='origin/master'
         FORK_HASH=$(git cherry ${FORK_BRANCH} | head -1)
         OLDREF=${FORK_HASH:2}
