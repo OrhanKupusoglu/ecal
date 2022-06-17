@@ -144,6 +144,7 @@ jobs:
     #---------------------------------------------------------------------------
 
     - name: 'Detect the change-set'
+      id: run_analysis
       run: |
         cd ${{ runner.workspace }}/ecal
 
@@ -155,22 +156,61 @@ jobs:
         git branch -l
         echo
         git branch -al
+        echo
+        git show-branch
+        echo
+        CURR_BRANCH=${GITHUB_REF#refs/heads/}
+        echo $CURR_BRANCH
+        echo
+        git rev-parse --abbrev-ref HEAD)
+        echo
+        git show-branch | grep '*' | grep -v "$CURR_BRANCH"
+        echo
+        git show-branch | grep '*' | grep -v "$CURR_BRANCH" | head -n1
+        echo
+        git show-branch | grep '*' | grep -v "$CURR_BRANCH" | head -n1 | sed 's/.*\[\(.*\)\].*/\1/'
+        echo
+        git show-branch | grep '*' | grep -v "$CURR_BRANCH" | head -n1 | sed 's/.*\[\(.*\)\].*/\1/' | sed 's/[\^~].*//'
 
-        FORK_BRANCH='origin/master'
-        FORK_HASH=$(git cherry ${FORK_BRANCH} | head -1)
-        OLDREF=${FORK_HASH:2}
-        NEWREF='HEAD'
-        echo "branch forked from branch: ${FORK_BRANCH}"
-        echo "branch forked from commit: ${FORK_HASH}"
-        echo "oldref: ${OLDREF}"
-        echo "newref: ${NEWREF}"
-        # https://git-scm.com/docs/git-diff
-        # ACMRT = Added (A), Copied (C), Modified (M), Renamed (R), Type changed (T)
-        git diff --stat --name-only --diff-filter=ACMRT "${OLDREF}..${NEWREF}" > _diff_check.txt
-        git diff --stat --name-only --diff-filter=ACMRT "${OLDREF}..${NEWREF}"
-        # DUXB = Deleted (D), Unmerged (U), Unknown (X), Broken (B)
-        git diff --stat --name-only --diff-filter=DUXB "${OLDREF}..${NEWREF}" > _diff_other.txt
-        git diff --stat --name-only --diff-filter=DUXB "${OLDREF}..${NEWREF}"
+        RUN_ANALYSIS=false
+        SHA_NULL='0000000000000000000000000000000000000000'
+
+        if [[ ${{ github.event_name }} == 'pull_request' ]]
+        then
+          OLD_REF=${{ github.event.pull_request.base.sha }}
+          NEW_REF=${{ github.event.pull_request.head.sha }}
+        else
+          # it is a push, $OLD_REF is $SHA_NULL for a new branch
+          OLD_REF=${{ github.event.payload.before }}
+          NEW_REF=${{ github.event.payload.after }}
+        fi
+
+        if [[ ${OLD_REF} == ${SHA_NULL} ]]
+        then
+          FORK_BRANCH='origin/master'
+          FORK_HASH=$(git cherry ${FORK_BRANCH} | head -1)
+          OLD_REF=${FORK_HASH:2}
+          NEW_REF='HEAD'
+          echo "branch forked from branch: ${FORK_BRANCH}"
+          echo "branch forked from commit: ${FORK_HASH}"
+          echo "oldref: ${OLD_REF}"
+          echo "newref: ${NEW_REF}"
+        fi
+
+        if [[ -n ${OLDREF} ]]
+        then
+          RUN_ANALYSIS=true
+
+          # https://git-scm.com/docs/git-diff
+          # ACMRT = Added (A), Copied (C), Modified (M), Renamed (R), Type changed (T)
+          git diff --stat --name-only --diff-filter=ACMRT "${OLD_REF}..${NEW_REF}" > _diff_check.txt
+          cat _diff_check.txt
+          # DUXB = Deleted (D), Unmerged (U), Unknown (X), Broken (B)
+          git diff --stat --name-only --diff-filter=DUXB "${OLD_REF}..${NEW_REF}" > _diff_other.txt
+          cat _diff_other.txt
+        fi
+
+        echo "::set-output name=value::${RUN_ANALYSIS}"
 
     # GNU tar - Excluding Some Files
     # https://www.gnu.org/software/tar/manual/html_node/exclude.html
@@ -201,5 +241,6 @@ jobs:
         path: ${{ runner.workspace }}/ecal.tar.gz
 
   call-clang-tidy:
+    if: ${{ steps.run_analysis.outputs.value }}
     needs: build-ubuntu
     uses: ./.github/workflows/run-clang-tidy.yml
