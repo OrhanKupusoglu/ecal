@@ -156,11 +156,11 @@ jobs:
           OLD_REF=${{ github.event.pull_request.base.sha }}
           NEW_REF=${{ github.event.pull_request.head.sha }}
         else
-          # it is a push, $OLD_REF is $SHA_NULL for a new branch
-          OLD_REF=${{ github.event.payload.before }}
-          NEW_REF=${{ github.event.payload.after }}
+          OLD_REF=${{ github.event.before }}
+          NEW_REF=${{ github.event.after }}
         fi
 
+        # it is a push, $OLD_REF is $SHA_NULL for a new branch + first push
         if [[ ${OLD_REF} == ${SHA_NULL} ]]
         then
           echo "WARNING - new branch, due to unknown fork point clang-tidy cannot be called for this changeset"
