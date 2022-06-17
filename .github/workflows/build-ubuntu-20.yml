@@ -143,34 +143,10 @@ jobs:
 
     #---------------------------------------------------------------------------
 
-    - name: 'Detect the change-set'
+    - name: 'Detect the changeset'
       id: run_analysis
       run: |
         cd ${{ runner.workspace }}/ecal
-
-        echo
-        pwd
-        echo
-        ls -l
-        echo
-        git branch -l
-        echo
-        git branch -al
-        echo
-        git show-branch
-        echo
-        CURR_BRANCH=${GITHUB_REF#refs/heads/}
-        echo $CURR_BRANCH
-        echo
-        git rev-parse --abbrev-ref HEAD)
-        echo
-        git show-branch | grep '*' | grep -v "$CURR_BRANCH"
-        echo
-        git show-branch | grep '*' | grep -v "$CURR_BRANCH" | head -n1
-        echo
-        git show-branch | grep '*' | grep -v "$CURR_BRANCH" | head -n1 | sed 's/.*\[\(.*\)\].*/\1/'
-        echo
-        git show-branch | grep '*' | grep -v "$CURR_BRANCH" | head -n1 | sed 's/.*\[\(.*\)\].*/\1/' | sed 's/[\^~].*//'
 
         RUN_ANALYSIS=false
         SHA_NULL='0000000000000000000000000000000000000000'
@@ -187,18 +163,8 @@ jobs:
 
         if [[ ${OLD_REF} == ${SHA_NULL} ]]
         then
-          FORK_BRANCH='origin/master'
-          FORK_HASH=$(git cherry ${FORK_BRANCH} | head -1)
-          OLD_REF=${FORK_HASH:2}
-          NEW_REF='HEAD'
-          echo "branch forked from branch: ${FORK_BRANCH}"
-          echo "branch forked from commit: ${FORK_HASH}"
-          echo "oldref: ${OLD_REF}"
-          echo "newref: ${NEW_REF}"
-        fi
-
-        if [[ -n ${OLDREF} ]]
-        then
+          echo "WARNING - new branch, due to unknown fork point clang-tidy cannot run on this changeset"
+        else
           RUN_ANALYSIS=true
 
           # https://git-scm.com/docs/git-diff
