@@ -179,7 +179,7 @@ jobs:
         echo "::set-output name=value::${RUN_ANALYSIS}"
 
     - name: 'Check for clang-tidy'
-      if: ${{ steps.run_analysis.value }}
+      if: ${{ !steps.run_analysis.outputs.value }}
       uses: actions/github-script@v6
       with:
         script: |
