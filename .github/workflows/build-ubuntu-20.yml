@@ -163,7 +163,7 @@ jobs:
 
         if [[ ${OLD_REF} == ${SHA_NULL} ]]
         then
-          echo "WARNING - new branch, due to unknown fork point clang-tidy cannot run on this changeset"
+          echo "WARNING - new branch, due to unknown fork point clang-tidy cannot be called for this changeset"
         else
           RUN_ANALYSIS=true
 
@@ -177,6 +177,13 @@ jobs:
         fi
 
         echo "::set-output name=value::${RUN_ANALYSIS}"
+
+    - name: 'Check for clang-tidy'
+      if: ${{ steps.run_analysis.value }}
+      uses: actions/github-script@v6
+      with:
+        script: |
+            core.setFailed('clang-tidy cannot run due to failed changeset detection')
 
     # GNU tar - Excluding Some Files
     # https://www.gnu.org/software/tar/manual/html_node/exclude.html
@@ -207,6 +214,5 @@ jobs:
         path: ${{ runner.workspace }}/ecal.tar.gz
 
   call-clang-tidy:
-    if: ${{ steps.run_analysis.outputs.value }}
     needs: build-ubuntu
     uses: ./.github/workflows/run-clang-tidy.yml
