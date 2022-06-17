@@ -175,10 +175,10 @@ jobs:
           cat _diff_other.txt
         fi
       env:
-        RUN_ANALYSIS: ${RUN_ANALYSIS}
+        RUN_ANALYSIS: toJSON(${RUN_ANALYSIS})
 
     - name: 'Check for clang-tidy'
-      if: ${{ ! env.RUN_ANALYSIS }}
+      if: ${{ ! fromJSON(env.RUN_ANALYSIS) }}
       uses: actions/github-script@v6
       with:
         script: |
