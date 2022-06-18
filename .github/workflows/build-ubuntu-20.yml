@@ -173,7 +173,7 @@ jobs:
           # DUXB = Deleted (D), Unmerged (U), Unknown (X), Broken (B)
           git diff --stat --name-only --diff-filter=DUXB "${OLD_REF}..${NEW_REF}" > _diff_other.txt
 
-          SEP_LINE=$(printf -- "%0.s-" {1..80})
+          SEP_LINE=$(printf -- "%0.s-" {1..100})
           echo "${SEP_LINE}"
           echo "additions: ${OLD_REF}..${NEW_REF}"
           echo "${SEP_LINE}"

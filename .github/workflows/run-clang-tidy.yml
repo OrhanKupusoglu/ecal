@@ -33,7 +33,7 @@ jobs:
 
       # see: ./build.sh --help
       - name: Run clang-tidy on the changeset
-        id: suffix
+        id: run
         run: |
           readarray -t FILES < _diff_check.txt
           build_linux/clang-tidy/build.sh -a -b ../../../_build -f ${FILES[@]}
@@ -43,7 +43,7 @@ jobs:
       - name: Archive logs as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: clang_tidy_log_${{ steps.suffix.outputs.timestamp }}
+          name: clang_tidy_log_${{ steps.run.outputs.timestamp }}
           path: ~/work/ecal/_build/clang_tidy_log_*.txt
           if-no-files-found: warn
 
@@ -71,5 +71,4 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            core.setFailed('number of clang-tidy warnings: ${{ steps.num_warnings.outputs.by_analysis }}')
-            core.info('number of files analyzed/changeset: ${{ steps.suffix.outputs.num_files }}')
+            core.setFailed('number of clang-tidy warnings: ${{ steps.num_warnings.outputs.by_analysis }}, number of files analyzed/changeset: ${{ steps.run.outputs.num_files }}')
