@@ -175,8 +175,8 @@ jobs:
           git diff --stat --name-only --diff-filter=DUXB "${OLD_REF}..${NEW_REF}" > _diff_other.txt
           cat _diff_other.txt
         fi
-      outputs:
-        go: ${RUN_ANALYSIS}
+
+        echo "::set-output name=go::${RUN_ANALYSIS}"
 
     - name: 'Check for clang-tidy'
       if: ${{ steps.run_analysis.outputs.go == 'false' }}
