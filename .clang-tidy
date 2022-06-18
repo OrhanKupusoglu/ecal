@@ -1,14 +1,12 @@
 ---
 # Resons why specific warnings have been turned off:
-# 
+#
 #  -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling
 #
 #    This warns about memcpy and wants us to use memcpy_s, which is not available in our gcc setup.
 #
 
-Checks: "-*,
-  clang-analyzer-*,
-  -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
+Checks: "-*
 "
 WarningsAsErrors: ''
 HeaderFilterRegex: ''
