@@ -144,6 +144,7 @@ jobs:
     #---------------------------------------------------------------------------
 
     - name: 'Detect the changeset'
+      id: run_analysis
       run: |
         cd ${{ runner.workspace }}/ecal
 
@@ -164,7 +165,7 @@ jobs:
         then
           echo "WARNING - new branch, due to unknown fork point clang-tidy cannot be called for this changeset"
         else
-          RUN_ANALYSIS=true
+          RUN_ANALYSIS='true'
 
           # https://git-scm.com/docs/git-diff
           # ACMRT = Added (A), Copied (C), Modified (M), Renamed (R), Type changed (T)
@@ -174,11 +175,11 @@ jobs:
           git diff --stat --name-only --diff-filter=DUXB "${OLD_REF}..${NEW_REF}" > _diff_other.txt
           cat _diff_other.txt
         fi
-      env:
-        RUN_ANALYSIS: ${RUN_ANALYSIS}
+      outputs:
+        go: ${RUN_ANALYSIS}
 
     - name: 'Check for clang-tidy'
-      if: ${{ env.RUN_ANALYSIS == 'false' }}
+      if: ${{ steps.run_analysis.outputs.go == 'false' }}
       uses: actions/github-script@v6
       with:
         script: |
