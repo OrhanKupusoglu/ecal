@@ -48,9 +48,10 @@ jobs:
           if-no-files-found: warn
 
       - name: Detect number of clang-tidy warnings
-        id: num_warnings
+        id: detect
         run: |
           NUM_WARNINGS=0
+          CONFIG_ERROR=0
           NUM_LOG_FILES=$(ls ~/work/ecal/_build/clang_tidy_log_*.txt 2> /dev/null | wc -l)
           if [[ ${NUM_LOG_FILES} -gt 0 ]]
           then
@@ -59,16 +60,23 @@ jobs:
             then
               echo "ERROR - no checks enabled, static analysis did not start due to faulty configuration"
               NUM_WARNINGS=1
+              CONFIG_ERROR=1
             else
               NUM_WARNINGS=$(grep -oE "\w+\.\w+:\w+:\w+:\s?warning:\s?.*" -- ~/work/ecal/_build/clang_tidy_log_*.txt | wc -l)
             fi
           fi
           echo "::set-output name=by_analysis::${NUM_WARNINGS}"
+          echo "::set-output name=config_error::${CONFIG_ERROR}"
 
       # https://github.com/actions/github-script
       - name: Check clang-tidy warnings
-        if: ${{ steps.num_warnings.outputs.by_analysis > 0 }}
+        if: ${{ steps.detect.outputs.by_analysis > 0 }}
         uses: actions/github-script@v6
         with:
           script: |
-            core.setFailed('number of clang-tidy warnings: ${{ steps.num_warnings.outputs.by_analysis }}, number of files analyzed/changeset: ${{ steps.run.outputs.num_files }}')
+            if (${{ steps.detect.outputs.config_error == 0 }}) {
+              core.info('number of files analyzed/changeset: ${{ steps.run.outputs.num_files }}')
+              core.setFailed('number of clang-tidy warnings: ${{ steps.detect.outputs.by_analysis }}')
+            } else {
+              core.setFailed('no checks enabled, static analysis did not start due to faulty configuration')
+            }
