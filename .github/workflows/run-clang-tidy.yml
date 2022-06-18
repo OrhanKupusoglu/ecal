@@ -75,8 +75,7 @@ jobs:
         with:
           script: |
             if (${{ steps.detect.outputs.config_error == 0 }}) {
-              core.info('number of files analyzed/changeset: ${{ steps.run.outputs.num_files }}')
-              core.setFailed('number of clang-tidy warnings: ${{ steps.detect.outputs.by_analysis }}')
+              core.setFailed('number of clang-tidy warnings: ${{ steps.num_warnings.outputs.by_analysis }}, number of files analyzed/changeset: ${{ steps.run.outputs.num_files }}')
             } else {
               core.setFailed('no checks enabled, static analysis did not start due to faulty configuration')
             }
