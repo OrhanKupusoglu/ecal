@@ -435,9 +435,7 @@ run_clang_tidy_on_files() {
             fi
         done
         echo "${SEP_1}"
-        echo
-        echo "-- number of files:"
-        echo "++ analyzed by clang-tidy / in the changeset: ${counter} / ${#FILE_LIST[@]}"
+        echo "::set-output name=num_files::${counter}/${#FILE_LIST[@]}"
     fi
 }
 

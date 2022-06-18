@@ -63,7 +63,7 @@ jobs:
               NUM_WARNINGS=$(grep -oE "\w+\.\w+:\w+:\w+:\s?warning:\s?.*" -- ~/work/ecal/_build/clang_tidy_log_*.txt | wc -l)
             fi
           fi
-          echo "::set-output name=value::${NUM_WARNINGS}"
+          echo "::set-output name=by_analysis::${NUM_WARNINGS}"
 
       # https://github.com/actions/github-script
       - name: Check clang-tidy warnings
@@ -71,4 +71,4 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            core.setFailed('number of clang-tidy warnings: ${{ steps.num_warnings.outputs.value}}')
+            core.setFailed('number of clang-tidy warnings:      ${{ steps.num_warnings.outputs.by_analysis}}\nnumber of files analyzed/changeset: ${{ steps.num_warnings.outputs.num_files}}')
