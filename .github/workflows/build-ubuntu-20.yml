@@ -170,9 +170,18 @@ jobs:
           # https://git-scm.com/docs/git-diff
           # ACMRT = Added (A), Copied (C), Modified (M), Renamed (R), Type changed (T)
           git diff --stat --name-only --diff-filter=ACMRT "${OLD_REF}..${NEW_REF}" > _diff_check.txt
-          cat _diff_check.txt
           # DUXB = Deleted (D), Unmerged (U), Unknown (X), Broken (B)
           git diff --stat --name-only --diff-filter=DUXB "${OLD_REF}..${NEW_REF}" > _diff_other.txt
+
+          SEP_LINE=$(printf -- "%0.s-" {1..80})
+          echo "${SEP_LINE}"
+          echo "additions: ${OLD_REF}..${NEW_REF}"
+          echo "${SEP_LINE}"
+          cat _diff_check.txt
+          echo 
+          echo "${SEP_LINE}"
+          echo "removals: ${OLD_REF}..${NEW_REF}"
+          echo "${SEP_LINE}"
           cat _diff_other.txt
         fi
 
