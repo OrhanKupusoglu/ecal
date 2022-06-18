@@ -13,7 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * TEST CLANG-TIDY-12
+ * TEST CLANG-TIDY-13
  * ========================= eCAL LICENSE =================================
 */
 
