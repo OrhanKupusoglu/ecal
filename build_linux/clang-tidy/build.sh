@@ -377,6 +377,8 @@ run_clang_tidy_on_files() {
         local file_base
         local file_name
         local file_ext
+        local cmd
+        local counter=0
 
         read_config
 
@@ -417,7 +419,8 @@ run_clang_tidy_on_files() {
                     else
                         # if 'compile_commands.json' is unreachable, clang-tidy gives the following error:
                         # "Error while trying to load a compilation database: ..."
-                        local cmd="${CLANG_TIDY} -p . ${file_abs}"
+                        cmd="${CLANG_TIDY} -p . ${file_abs}"
+                        counter=$((counter + 1))
                         echo "## analyzing"
                         echo "${SEP_2}"
                         echo "${cmd}" |& tee -a "${FILE_CLANG_TIDY_OUTPUT}"
@@ -432,6 +435,9 @@ run_clang_tidy_on_files() {
             fi
         done
         echo "${SEP_1}"
+        echo
+        echo "-- number of files:"
+        echo "++ analyzed by clang-tidy / in the changeset: ${counter} / ${#FILE_LIST[@]}"
     fi
 }
 
