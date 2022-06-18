@@ -71,4 +71,5 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            core.setFailed('number of clang-tidy warnings: ${{ steps.num_warnings.outputs.by_analysis }}, number of files analyzed/changeset: ${{ steps.suffix.outputs.num_files }}')
+            core.setFailed('number of clang-tidy warnings: ${{ steps.num_warnings.outputs.by_analysis }}')
+            core.info('number of files analyzed/changeset: ${{ steps.suffix.outputs.num_files }}')
