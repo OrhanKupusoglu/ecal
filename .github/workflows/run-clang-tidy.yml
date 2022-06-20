@@ -20,7 +20,6 @@ jobs:
           echo $(g++ --version)
           echo $(clang --version)
           echo $(cmake --version)
-          echo $(clang-tidy --version)
 
       # https://github.com/actions/download-artifact
       - name: Download the built directory
@@ -32,41 +31,54 @@ jobs:
       - name: Extract the tarball archive
         run: mv ecal.tar.gz ../. && cd .. && rm -rf ecal && tar -xzf ecal.tar.gz && cd ecal
 
-      # https://github.com/Ana06/get-changed-files
-      - name: Detect the changeset
-        id: changed_files
-        uses: Ana06/get-changed-files@v2.1.0
-
       # see: ./build.sh --help
       - name: Run clang-tidy on the changeset
-        id: suffix
+        id: run
         run: |
-          build_linux/clang-tidy/build.sh -a -b ../../../_build -f ${{ steps.changed_files.outputs.added_modified }}
+          readarray -t FILES < _diff_check.txt
+          build_linux/clang-tidy/build.sh -a -b ../../../_build -f ${FILES[@]}
 
       # https://github.com/actions/upload-artifact
       # If make or clang-tidy is never called, artifact upload will fail (no log files) with just a warning.
       - name: Archive logs as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: clang_tidy_log_${{ steps.suffix.outputs.timestamp }}
+          name: clang_tidy_log_${{ steps.run.outputs.timestamp }}
           path: ~/work/ecal/_build/clang_tidy_log_*.txt
           if-no-files-found: warn
 
       - name: Detect number of clang-tidy warnings
-        id: num_warnings
+        id: detect
         run: |
           NUM_WARNINGS=0
+          CONFIG_ERROR='false'
           NUM_LOG_FILES=$(ls ~/work/ecal/_build/clang_tidy_log_*.txt 2> /dev/null | wc -l)
+
           if [[ ${NUM_LOG_FILES} -gt 0 ]]
           then
-            NUM_WARNINGS=$(grep -oE "\w+\.\w+:\w+:\w+:\s?warning:\s?.*" -- ~/work/ecal/_build/clang_tidy_log_*.txt | wc -l)
+            NUM_NO_CHECKS=$(grep -o "Error: no checks enabled" -- ~/work/ecal/_build/clang_tidy_log_*.txt | wc -l)
+            if [[ ${NUM_NO_CHECKS} -gt 0 ]]
+            then
+              echo "ERROR - no checks enabled, static analysis did not start due to faulty configuration"
+              NUM_WARNINGS=1
+              CONFIG_ERROR='true'
+            else
+              NUM_WARNINGS=$(grep -oE "\w+\.\w+:\w+:\w+:\s?warning:\s?.*" -- ~/work/ecal/_build/clang_tidy_log_*.txt | wc -l)
+            fi
           fi
-          echo "::set-output name=value::${NUM_WARNINGS}"
+
+          echo "::set-output name=warnings::${NUM_WARNINGS}"
+          echo "::set-output name=config_error::${CONFIG_ERROR}"
 
       # https://github.com/actions/github-script
       - name: Check clang-tidy warnings
-        if: ${{ steps.num_warnings.outputs.value > 0 }}
+        if: steps.detect.outputs.warnings > 0
         uses: actions/github-script@v6
         with:
           script: |
-            core.setFailed('number of clang-tidy warnings: ${{ steps.num_warnings.outputs.value}}')
+            if (${{ steps.detect.outputs.config_error == 'false' }}) {
+              core.setFailed('number of clang-tidy warnings: ${{ steps.detect.outputs.warnings }}, number of files analyzed/changeset: ${{ steps.run.outputs.num_files }}')
+            } else {
+              core.setFailed('no checks enabled, static analysis did not start due to faulty configuration')
+            }
+
