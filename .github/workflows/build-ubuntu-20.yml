@@ -9,6 +9,8 @@ on:
 jobs:
   build-ubuntu:
     runs-on: ubuntu-20.04
+    outputs:
+      go: ${{ steps.changeset.outputs.go }}
 
     steps:
     - name: Install Dependencies
@@ -220,6 +222,6 @@ jobs:
         path: ${{ runner.workspace }}/ecal.tar.gz
 
   call-clang-tidy:
-    if: steps.changeset.outputs.go == 'true'
+    if: needs.build-ubuntu.outputs.go == 'true'
     needs: build-ubuntu
     uses: ./.github/workflows/run-clang-tidy.yml
