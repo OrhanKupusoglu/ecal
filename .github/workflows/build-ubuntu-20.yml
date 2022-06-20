@@ -140,6 +140,57 @@ jobs:
 
     #---------------------------------------------------------------------------
 
+    - name: 'Detect the changeset'
+      id: changeset
+      run: |
+        cd ${{ runner.workspace }}/ecal
+
+        RUN_ANALYSIS='false'
+        SHA_NULL='0000000000000000000000000000000000000000'
+
+        if [[ ${{ github.event_name }} == 'pull_request' ]]
+        then
+          OLD_REF=${{ github.event.pull_request.base.sha }}
+          NEW_REF=${{ github.event.pull_request.head.sha }}
+        else
+          OLD_REF=${{ github.event.before }}
+          NEW_REF=${{ github.event.after }}
+        fi
+
+        # it is a push, $OLD_REF is $SHA_NULL for a new branch + first push
+        if [[ ${OLD_REF} == ${SHA_NULL} ]]
+        then
+          echo "WARNING - new branch, due to unknown fork point clang-tidy cannot be called for this changeset"
+        else
+          RUN_ANALYSIS='true'
+
+          # https://git-scm.com/docs/git-diff
+          # ACMRT = Added (A), Copied (C), Modified (M), Renamed (R), Type changed (T)
+          git diff --stat --name-only --diff-filter=ACMRT "${OLD_REF}..${NEW_REF}" > _diff_check.txt
+          # DUXB = Deleted (D), Unmerged (U), Unknown (X), Broken (B)
+          git diff --stat --name-only --diff-filter=DUXB "${OLD_REF}..${NEW_REF}" > _diff_other.txt
+
+          SEP_LINE=$(printf -- "%0.s-" {1..100})
+          echo "${SEP_LINE}"
+          echo "additions: ${OLD_REF}..${NEW_REF}"
+          echo "${SEP_LINE}"
+          cat _diff_check.txt
+          echo
+          echo "${SEP_LINE}"
+          echo "removals: ${OLD_REF}..${NEW_REF}"
+          echo "${SEP_LINE}"
+          cat _diff_other.txt
+        fi
+
+        echo "::set-output name=go::${RUN_ANALYSIS}"
+
+    # - name: 'Check for clang-tidy'
+    #   if: ${{ steps.changeset.outputs.go == 'false' }}
+    #   uses: actions/github-script@v6
+    #   with:
+    #     script: |
+    #         core.setFailed('clang-tidy cannot run due to failed changeset detection')
+
     # GNU tar - Excluding Some Files
     # https://www.gnu.org/software/tar/manual/html_node/exclude.html
     # the emtpy '.git/' drectory is required, it marks the root directory
@@ -161,15 +212,14 @@ jobs:
             -czf ecal.tar.gz ecal/ _build/
         du -sh ecal.tar.gz
 
-
     # https://github.com/actions/upload-artifact
-    - name: Upload the whole directory
+    - name: 'Upload the whole directory'
       uses: actions/upload-artifact@v3
       with:
         name: ecal-dir
         path: ${{ runner.workspace }}/ecal.tar.gz
 
   call-clang-tidy:
-    if: github.event_name == 'pull_request'
+    if: steps.changeset.outputs.go == 'true'
     needs: build-ubuntu
     uses: ./.github/workflows/run-clang-tidy.yml
