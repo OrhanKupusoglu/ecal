@@ -334,5 +334,5 @@ jobs:
       token: ${{ secrets.JENKINS_TOKEN_GH_RELEASE }}    
     with:
       artifact_name: 'windows-setup'
-      asset_name: ${{ needs.build-windows.outputs.ASSET_NAME }}"
-      repository_name: ${{ needs.build-windows.zoutputs.GITHUB_REPOSITORY }}"
+      asset_name: ${{ needs.build-windows.outputs.ASSET_NAME }}
+      repository_name: ${{ needs.build-windows.outputs.GITHUB_REPOSITORY }}
