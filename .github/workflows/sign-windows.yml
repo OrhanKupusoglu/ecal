@@ -25,18 +25,21 @@ jobs:
     # temporarily create a release so that remote CI server can download the just uploaded binary asset
 
     - name: Set var names for the temporary release
-      if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && secrets.token != ''
+      if: env.IS_JENKINS_SIGNING_ALLOWED == 'true'
       run: |
         DATE_TIME=$(date +"%Y-%m-%dT%H:%M:%S")
         TAG_SUFFIX=${DATE_TIME//:/_}
         echo "TEMP_RELEASE_NAME=Temporary_Release_${DATE_TIME}" >> $GITHUB_ENV
         echo "TEMP_RELEASE_TAG=temp_rel_${TAG_SUFFIX}" >> $GITHUB_ENV
+        echo "JENKINS_TOKEN=${{ env.JENKINS_TOKEN }}" >> $GITHUB_ENV
       shell: bash
       working-directory: ${{ runner.workspace }}/_build/complete/_deploy
+      env:
+        JENKINS_TOKEN: ${{ secrets.token }}
 
     # https://github.com/softprops/action-gh-release
     - name: Create a temporary release
-      if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && secrets.token != ''
+      if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && env.JENKINS_TOKEN != ''
       id: temp_rel
       uses: softprops/action-gh-release@v0.1.15
       with:
@@ -222,13 +225,10 @@ jobs:
       shell: bash
       working-directory: ${{ runner.workspace }}/_build/complete/_deploy
       env:
-        JENKINS_TOKEN: ${{ secrets.token }}
         ASSET_NAME: ${{ inputs.asset_name }}
-        GH_RELEASE_ID: ${{ env.TEMP_RELEASE_ID }}
-        GH_ASSET_URL: ${{ env.TEMP_ASSET_DOWNLOAD_URL }}
 
     - name: Delete the temporary release
-      if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && secrets.token != ''
+      if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && env.JENKINS_TOKEN != ''
       run: |
         # GitHub CLI api
         # https://cli.github.com/manual/gh_api
