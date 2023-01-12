@@ -11,6 +11,10 @@ on:
         description: 'Released binary asset''s name'
         required: true
         type: string
+      artifact_name:
+        description: 'Uploaded artifacts''s name'
+        required: true
+        type: string        
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
@@ -33,6 +37,7 @@ jobs:
         echo "TEMP_RELEASE_TAG=temp_rel_${TAG_SUFFIX}" >> $GITHUB_ENV
         echo "JENKINS_TOKEN=${{ env.JENKINS_TOKEN }}" >> $GITHUB_ENV
         echo "ASSET_NAME=${{ inputs.asset_name }}" >> $GITHUB_ENV
+        echo "ARTIFACT_NAME=${{ inputs.artifact_name }}" >> $GITHUB_ENV
         mkdir -p _build/complete/_deploy
       shell: bash
       env:
@@ -42,9 +47,9 @@ jobs:
       if: env.IS_JENKINS_SIGNING_ALLOWED == 'true'
       uses: actions/download-artifact@v3.0.2
       with:
-        name: env.ASSET_NAME
+        name: env.ARTIFACT_NAME
         path: _build/complete/_deploy
-
+     
     # https://github.com/softprops/action-gh-release
     - name: Create a temporary release
       if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && env.JENKINS_TOKEN != ''

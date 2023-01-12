@@ -269,10 +269,11 @@ jobs:
 #       run: cpack -C Release
 #       working-directory: ${{ runner.workspace }}/_build/complete
 
-    - name: Create binary
+    - name: Create binaries
       run: |
         mkdir -p _build/complete/_deploy && cd $_
         echo "temporary test binary" > "ecal-5.11.0-win64.exe" 
+        echo "temporary test binary" > "ecal-5.11.0-win64.whl" 
         pwd
         ls -l
       shell: bash
@@ -331,3 +332,4 @@ jobs:
       token: ${{ secrets.JENKINS_TOKEN_GH_RELEASE }}    
     with:
       asset_name: env.ASSET_NAME
+      artifact_name: windows-setup
