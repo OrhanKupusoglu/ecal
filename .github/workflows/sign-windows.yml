@@ -7,14 +7,14 @@ on:
         description: 'Token for the Jenkins job'
         required: true  
     inputs:
-      asset_name:
-        description: 'Released binary asset''s name'
-        required: true
-        type: string
       artifact_name:
         description: 'Uploaded artifacts''s name'
         required: true
         type: string 
+      asset_name:
+        description: 'Released binary asset''s name'
+        required: true
+        type: string
       repository_name:
         description: 'Repository name as OWNER/REPO'
         required: true
@@ -40,15 +40,15 @@ jobs:
         echo "TEMP_RELEASE_NAME=Temporary_Release_${DATE_TIME}" >> $GITHUB_ENV
         echo "TEMP_RELEASE_TAG=temp_rel_${TAG_SUFFIX}" >> $GITHUB_ENV
         echo "JENKINS_TOKEN=${{ env.JENKINS_TOKEN }}" >> $GITHUB_ENV
-        echo "ASSET_NAME=${{ env.ASSET }}" >> $GITHUB_ENV
-        echo "ARTIFACT_NAME=${{ env.ARTIFACT }}" >> $GITHUB_ENV
+        echo "ARTIFACT_NAME=${{ env.ARTIFACT_NAME }}" >> $GITHUB_ENV
+        echo "ASSET_NAME=${{ env.ASSET_NAME }}" >> $GITHUB_ENV
         echo "REPOSITORY_NAME=${{ env.REPOSITORY_NAME }}" >> $GITHUB_ENV
         mkdir -p _build/complete/_deploy
       shell: bash
       env:
         JENKINS_TOKEN: ${{ secrets.token }}
-        ASSET: ${{ inputs.asset_name }}
-        ARTIFACT: ${{ inputs.artifact_name }}
+        ARTIFACT_NAME: ${{ inputs.artifact_name }}
+        ASSET_NAME: ${{ inputs.asset_name }}
         REPOSITORY_NAME: ${{ inputs.repository_name }}
 
     - name: Download artifact
