@@ -331,6 +331,6 @@ jobs:
     secrets:
       token: ${{ secrets.JENKINS_TOKEN_GH_RELEASE }}    
     with:
-      artifact_name: windows-setup
+      artifact_name: 'windows-setup'
       asset_name: ${{ env.ASSET_NAME }}
       repository_name: ${{ env.GITHUB_REPOSITORY }}

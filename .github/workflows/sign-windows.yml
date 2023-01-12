@@ -70,7 +70,7 @@ jobs:
         append_body: false
         name: ${{ env.TEMP_RELEASE_NAME }}
         tag_name: ${{ env.TEMP_RELEASE_TAG }}
-        files: _build/complete/_deploy/*.exe
+        files: _build/complete/_deploy/${{ env.ASSET_NAME }}
 
     - name: Collect data about the temporary release
       if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && env.JENKINS_TOKEN != ''
@@ -86,7 +86,6 @@ jobs:
         #echo "TEMP_RELEASE_UPLOAD_URL=${TEMP_RELEASE_UPLOAD_URL}" >> $GITHUB_ENV
         #echo "TEMP_RELEASE_ASSETS=${TEMP_RELEASE_ASSETS}" >> $GITHUB_ENV
         echo "TEMP_ASSET_DOWNLOAD_URL=${TEMP_ASSET_DOWNLOAD_URL}" >> $GITHUB_ENV
-        echo "ASSET_NAME=$(ls *.exe)" >> $GITHUB_ENV
 
         echo "-- Repository         : ${{ env.REPOSITORY_NAME }}"
         echo "-- Release URL        : ${TEMP_RELEASE_URL}"
