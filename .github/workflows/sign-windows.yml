@@ -52,7 +52,7 @@ jobs:
         files: ${{ runner.workspace }}/_build/complete/_deploy/${{ inputs.asset_name }}
 
     - name: Collect data about the temporary release
-      if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && secrets.token != ''
+      if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && env.JENKINS_TOKEN != ''
       run: |
         TEMP_RELEASE_URL="${{ steps.temp_rel.outputs.url }}"
         TEMP_RELEASE_ID="${{ steps.temp_rel.outputs.id }}"
@@ -75,6 +75,7 @@ jobs:
       shell: bash
 
     - name: Sign the installer on Eclipse CI
+      if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && env.JENKINS_TOKEN != ''
       run: |
         export LC_CTYPE=en_US.utf8
 
