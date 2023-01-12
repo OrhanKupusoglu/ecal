@@ -309,20 +309,20 @@ jobs:
         cert_pswd: ${{ secrets.CERT_PSWD }}
         cert_algo: ${{ secrets.CERT_ALGO }}
         cert_hash: ${{ secrets.CERT_HASH }}
-        folder: ${{ runner.workspace }}/_build/complete/_deploy
+        folder: _build/complete/_deploy
         debug: false
 
     - name: Upload Windows setup
       uses: actions/upload-artifact@v3
       with:
         name: windows-setup
-        path: ${{ runner.workspace }}/_build/complete/_deploy/*.exe
+        path: _build/complete/_deploy/*.exe
 
     - name: Upload Python Wheels
       uses: actions/upload-artifact@v3
       with:
         name: windows-python-wheels
-        path: ${{ runner.workspace }}/_build/complete/_deploy/*.whl
+        path: _build/complete/_deploy/*.whl
 
   call-sign:
     needs: build-windows

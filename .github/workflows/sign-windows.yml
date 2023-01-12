@@ -32,10 +32,18 @@ jobs:
         echo "TEMP_RELEASE_NAME=Temporary_Release_${DATE_TIME}" >> $GITHUB_ENV
         echo "TEMP_RELEASE_TAG=temp_rel_${TAG_SUFFIX}" >> $GITHUB_ENV
         echo "JENKINS_TOKEN=${{ env.JENKINS_TOKEN }}" >> $GITHUB_ENV
+        echo "ASSET_NAME=${{ inputs.asset_name }}" >> $GITHUB_ENV
+        mkdir -p _build/complete/_deploy
       shell: bash
-      working-directory: ${{ runner.workspace }}/_build/complete/_deploy
       env:
         JENKINS_TOKEN: ${{ secrets.token }}
+
+    - name: Download artifact
+      if: env.IS_JENKINS_SIGNING_ALLOWED == 'true'
+      uses: actions/download-artifact@v3.0.2
+      with:
+        name: env.ASSET_NAME
+        path: _build/complete/_deploy
 
     # https://github.com/softprops/action-gh-release
     - name: Create a temporary release
@@ -49,7 +57,7 @@ jobs:
         append_body: false
         name: env.TEMP_RELEASE_NAME
         tag_name: env.TEMP_RELEASE_TAG
-        files: ${{ runner.workspace }}/_build/complete/_deploy/${{ inputs.asset_name }}
+        files: _build/complete/_deploy/${{ inputs.asset_name }}
 
     - name: Collect data about the temporary release
       if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && env.JENKINS_TOKEN != ''
@@ -79,6 +87,7 @@ jobs:
       run: |
         export LC_CTYPE=en_US.utf8
 
+        ASSET_NAME_OLD="${ASSET_NAME}.old"
         JENKINS_JOB='gh_auto_release'
         TOKEN="${JENKINS_TOKEN}"
         RELEASE_ID="${GH_RELEASE_ID}"
@@ -96,8 +105,7 @@ jobs:
         REGEX_NUMBER=',"number":\s*(.*),'
         COUNTER=0
 
-        mkdir -p _build/complete/_deploy && cd $_
-
+        mv "${ARTIFACT_NAME}" "${ARTIFACT_NAME_OLD}"
         printf -- "-- trigger a new build with\n   release id     : %d\n   download asset : %s\n   BASE64         : %s\n" \
           ${RELEASE_ID} "${GH_ASSET_URL}" "${ASSET_URL}" 
 
@@ -224,9 +232,7 @@ jobs:
           exit 1
         fi
       shell: bash
-      working-directory: ${{ runner.workspace }}/_build/complete/_deploy
-      env:
-        ASSET_NAME: ${{ inputs.asset_name }}
+      working-directory: _build/complete/_deploy
 
     - name: Delete the temporary release
       if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && env.JENKINS_TOKEN != ''
@@ -244,4 +250,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: windows-setup-eclipse
-        path: ${{ runner.workspace }}/_build/complete/_deploy/${{ inputs.asset_name }}
+        path: _build/complete/_deploy/${{ env.ASSET_NAME }}
