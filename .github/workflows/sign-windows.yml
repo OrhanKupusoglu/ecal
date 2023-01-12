@@ -60,9 +60,9 @@ jobs:
         prerelease: true
         generate_release_notes: false
         append_body: false
-        name: env.TEMP_RELEASE_NAME
-        tag_name: env.TEMP_RELEASE_TAG
-        files: _build/complete/_deploy/${{ inputs.asset_name }}
+        name: ${{ env.TEMP_RELEASE_NAME }}
+        tag_name: ${{ env.TEMP_RELEASE_TAG }}
+        files: _build/complete/_deploy/${{ env.ASSET_NAME }}
 
     - name: Collect data about the temporary release
       if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && env.JENKINS_TOKEN != ''
