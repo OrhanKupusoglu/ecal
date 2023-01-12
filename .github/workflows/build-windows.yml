@@ -298,7 +298,7 @@ jobs:
         CERT_PSWD: ${{ secrets.CERT_PSWD }}
         CERT_ALGO: ${{ secrets.CERT_ALGO }}
         CERT_HASH: ${{ secrets.CERT_HASH }}
-      working-directory: ${{ runner.workspace }}/_build/complete/_deploy
+      working-directory: _build/complete/_deploy
 
     # https://github.com/OrhanKupusoglu/code-sign-action
     - name: Sign the installer
