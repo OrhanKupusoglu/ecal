@@ -273,6 +273,7 @@ jobs:
       run: |
         mkdir -p ${{ runner.workspace }}/_build/complete/_deploy && cd $_
         echo "temporary test binary" > "ecal-5.11.0-win64.exe" 
+      shell: bash
 
     - name: Detect certificate
       if: env.IS_GITHUB_SIGNING_ALLOWED == 'true'
