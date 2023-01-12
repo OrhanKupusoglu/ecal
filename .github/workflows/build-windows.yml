@@ -327,4 +327,4 @@ jobs:
     secrets:
       token: ${{ secrets.JENKINS_TOKEN_GH_RELEASE }}    
     with:
-      asset_name: ${{ env.ASSET_NAME }}
+      asset_name: env.ASSET_NAME
