@@ -7,7 +7,6 @@ on:
       - master
 env:
   IS_GITHUB_SIGNING_ALLOWED: true
-  IS_JENKINS_SIGNING_ALLOWED: true
 
 jobs:
   build-windows:
@@ -323,10 +322,9 @@ jobs:
         path: ${{ runner.workspace }}/_build/complete/_deploy/*.whl
 
   call-sign:
-    if: env.IS_GITHUB_SIGNING_ALLOWED == 'true' && secrets.JENKINS_TOKEN_GH_RELEASE != ''
     needs: build-windows
     uses: ./.github/workflows/sign-windows.yml
     secrets:
       token: ${{ secrets.JENKINS_TOKEN_GH_RELEASE }}    
     with:
-      asset_name: env.ASSET_NAME
+      asset_name: ${{ env.ASSET_NAME }}
