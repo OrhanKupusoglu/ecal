@@ -104,8 +104,8 @@ jobs:
         ASSET_NAME_OLD="${ASSET_NAME}.old"
         JENKINS_JOB='gh_auto_release'
         TOKEN="${JENKINS_TOKEN}"
-        RELEASE_ID="${GH_RELEASE_ID}"
-        ASSET_URL=$(echo "${GH_ASSET_URL}" | base64 --wrap 0)
+        RELEASE_ID="${TEMP_RELEASE_ID}"
+        ASSET_URL=$(echo "${TEMP_ASSET_DOWNLOAD_URL}" | base64 --wrap 0)
         JENKINS_BASE_URL="https://ci.eclipse.org/ecal/job/${JENKINS_JOB}"
         JENKINS_TRIGGER_URL="${JENKINS_BASE_URL}/buildWithParameters?token=${TOKEN}&GH_RELEASE_ID=${RELEASE_ID}&GH_ASSET_URL=${ASSET_URL}"
         JENKINS_STATUS_URL="${JENKINS_BASE_URL}/lastBuild/api/json"
@@ -121,7 +121,7 @@ jobs:
 
         mv "${ASSET_NAME}" "${ASSET_NAME_OLD}"
         printf -- "-- trigger a new build with\n   release id     : %d\n   download asset : %s\n   BASE64         : %s\n" \
-          ${RELEASE_ID} "${GH_ASSET_URL}" "${ASSET_URL}" 
+          ${RELEASE_ID} "${TEMP_ASSET_DOWNLOAD_URL}" "${ASSET_URL}" 
 
         mapfile -t RESPONSE_HEADERS < <(curl -i -s -S -L "${JENKINS_TRIGGER_URL}")
         for HEADER in "${RESPONSE_HEADERS[@]}"
