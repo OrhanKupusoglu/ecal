@@ -14,7 +14,11 @@ on:
       artifact_name:
         description: 'Uploaded artifacts''s name'
         required: true
-        type: string        
+        type: string 
+      repository_name:
+        description: 'Repository name as OWNER/REPO'
+        required: true
+        type: string                
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
@@ -38,12 +42,14 @@ jobs:
         echo "JENKINS_TOKEN=${{ env.JENKINS_TOKEN }}" >> $GITHUB_ENV
         echo "ASSET_NAME=${{ env.ASSET }}" >> $GITHUB_ENV
         echo "ARTIFACT_NAME=${{ env.ARTIFACT }}" >> $GITHUB_ENV
+        echo "REPOSITORY_NAME=${{ env.REPOSITORY_NAME }}" >> $GITHUB_ENV
         mkdir -p _build/complete/_deploy
       shell: bash
       env:
         JENKINS_TOKEN: ${{ secrets.token }}
         ASSET: ${{ inputs.asset_name }}
         ARTIFACT: ${{ inputs.artifact_name }}
+        REPOSITORY_NAME: ${{ inputs.repository_name }}
 
     - name: Download artifact
       if: env.IS_JENKINS_SIGNING_ALLOWED == 'true'
@@ -64,7 +70,7 @@ jobs:
         append_body: false
         name: ${{ env.TEMP_RELEASE_NAME }}
         tag_name: ${{ env.TEMP_RELEASE_TAG }}
-        files: _build/complete/_deploy/${{ inputs.asset_name }}
+        files: _build/complete/_deploy/*.exe
 
     - name: Collect data about the temporary release
       if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && env.JENKINS_TOKEN != ''
@@ -80,14 +86,16 @@ jobs:
         #echo "TEMP_RELEASE_UPLOAD_URL=${TEMP_RELEASE_UPLOAD_URL}" >> $GITHUB_ENV
         #echo "TEMP_RELEASE_ASSETS=${TEMP_RELEASE_ASSETS}" >> $GITHUB_ENV
         echo "TEMP_ASSET_DOWNLOAD_URL=${TEMP_ASSET_DOWNLOAD_URL}" >> $GITHUB_ENV
+        echo "ASSET_NAME=$(ls *.exe)" >> $GITHUB_ENV
 
-        echo "-- Repository         : ${{ env.GITHUB_REPOSITORY }}"
+        echo "-- Repository         : ${{ env.REPOSITORY_NAME }}"
         echo "-- Release URL        : ${TEMP_RELEASE_URL}"
         echo "-- Release ID         : ${TEMP_RELEASE_ID}"
         echo "-- Release upload URL : ${TEMP_RELEASE_UPLOAD_URL}"
         echo "-- Release assets     : ${TEMP_RELEASE_ASSETS}"
         echo "-- Asset download URL : ${TEMP_ASSET_DOWNLOAD_URL}"
       shell: bash
+      working-directory: _build/complete/_deploy
 
     - name: Sign the installer on Eclipse CI
       if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && env.JENKINS_TOKEN != ''
@@ -249,7 +257,7 @@ jobs:
         gh api \
           --method DELETE \
           -H "Accept: application/vnd.github+json" \
-          "/repos/${{ env.GITHUB_REPOSITORY }}/releases/${{ env.TEMP_RELEASE_ID }}"
+          "/repos/${{ env.REPOSITORY_NAME }}/releases/${{ env.TEMP_RELEASE_ID }}"
       shell: bash
 
     - name: Upload Windows setup signed on Eclipse CI
