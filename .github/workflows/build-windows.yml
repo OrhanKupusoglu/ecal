@@ -329,7 +329,7 @@ jobs:
         path: _build/complete/_deploy/*.whl
 
   call-sign:
-    needs: build-windows
+    needs: buildwindows
     uses: ./.github/workflows/sign-windows.yml
     secrets:
       token: ${{ secrets.JENKINS_TOKEN_GH_RELEASE }}    
