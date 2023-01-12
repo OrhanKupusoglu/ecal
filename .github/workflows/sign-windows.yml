@@ -36,12 +36,14 @@ jobs:
         echo "TEMP_RELEASE_NAME=Temporary_Release_${DATE_TIME}" >> $GITHUB_ENV
         echo "TEMP_RELEASE_TAG=temp_rel_${TAG_SUFFIX}" >> $GITHUB_ENV
         echo "JENKINS_TOKEN=${{ env.JENKINS_TOKEN }}" >> $GITHUB_ENV
-        echo "ASSET_NAME=${{ inputs.asset_name }}" >> $GITHUB_ENV
-        echo "ARTIFACT_NAME=${{ inputs.artifact_name }}" >> $GITHUB_ENV
+        echo "ASSET_NAME=${{ env.ASSET }}" >> $GITHUB_ENV
+        echo "ARTIFACT_NAME=${{ env.ARTIFACT }}" >> $GITHUB_ENV
         mkdir -p _build/complete/_deploy
       shell: bash
       env:
         JENKINS_TOKEN: ${{ secrets.token }}
+        ASSET: ${{ inputs.asset_name }}
+        ARTIFACT: ${{ inputs.artifact_name }}
 
     - name: Download artifact
       if: env.IS_JENKINS_SIGNING_ALLOWED == 'true'
@@ -62,7 +64,7 @@ jobs:
         append_body: false
         name: ${{ env.TEMP_RELEASE_NAME }}
         tag_name: ${{ env.TEMP_RELEASE_TAG }}
-        files: _build/complete/_deploy/${{ env.ASSET_NAME }}
+        files: _build/complete/_deploy/${{ inputs.asset_name }}
 
     - name: Collect data about the temporary release
       if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && env.JENKINS_TOKEN != ''
@@ -110,7 +112,7 @@ jobs:
         REGEX_NUMBER=',"number":\s*(.*),'
         COUNTER=0
 
-        mv "${ARTIFACT_NAME}" "${ARTIFACT_NAME_OLD}"
+        mv "${ASSET_NAME}" "${ASSET_NAME_OLD}"
         printf -- "-- trigger a new build with\n   release id     : %d\n   download asset : %s\n   BASE64         : %s\n" \
           ${RELEASE_ID} "${GH_ASSET_URL}" "${ASSET_URL}" 
 
