@@ -271,8 +271,10 @@ jobs:
 
     - name: Create binary
       run: |
-        mkdir -p ${{ runner.workspace }}/_build/complete/_deploy && cd $_
+        mkdir -p ${{ runner.workspace }}\_build\complete\_deploy && cd $_
         echo "temporary test binary" > "ecal-5.11.0-win64.exe" 
+        pwd
+        ls -l
       shell: bash
 
     - name: Detect certificate
