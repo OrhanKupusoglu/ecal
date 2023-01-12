@@ -47,7 +47,7 @@ jobs:
       if: env.IS_JENKINS_SIGNING_ALLOWED == 'true'
       uses: actions/download-artifact@v3.0.2
       with:
-        name: env.ARTIFACT_NAME
+        name: ${{ env.ARTIFACT_NAME }}
         path: _build/complete/_deploy
      
     # https://github.com/softprops/action-gh-release
