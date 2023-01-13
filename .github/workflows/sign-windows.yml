@@ -10,7 +10,15 @@ on:
       artifact_name:
         description: 'Uploaded artifacts''s name'
         required: true
-        type: string         
+        type: string  
+      asset_name:
+        description: 'Released binary asset''s name'
+        required: true
+        type: string
+      github_repository:
+        description: 'Repository name as OWNER/REPO'
+        required: true
+        type: string                  
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
@@ -33,15 +41,15 @@ jobs:
         echo "TEMP_RELEASE_TAG=temp_rel_${TAG_SUFFIX}" >> $GITHUB_ENV
         echo "JENKINS_TOKEN=${{ env.JENKINS_TOKEN }}" >> $GITHUB_ENV
         echo "ARTIFACT_NAME=${{ env.ARTIFACT_NAME }}" >> $GITHUB_ENV
-        #echo "ASSET_NAME=${{ env.ASSET_NAME }}" >> $GITHUB_ENV
-        #echo "GITHUB_REPOSITORY=${{ env.GITHUB_REPOSITORY }}" >> $GITHUB_ENV
+        echo "ASSET_NAME=${{ env.ASSET_NAME }}" >> $GITHUB_ENV
+        echo "GITHUB_REPOSITORY=${{ env.GITHUB_REPOSITORY }}" >> $GITHUB_ENV
         mkdir -p _build/complete/_deploy
       shell: bash
       env:
         JENKINS_TOKEN: ${{ secrets.token }}
         ARTIFACT_NAME: ${{ inputs.artifact_name }}
-        #ASSET_NAME: ${{ inputs.asset_name }}
-        #GITHUB_REPOSITORY: ${{ inputs.github_repository }}
+        ASSET_NAME: ${{ inputs.asset_name }}
+        GITHUB_REPOSITORY: ${{ inputs.github_repository }}
 
     - name: Download artifact
       if: env.IS_JENKINS_SIGNING_ALLOWED == 'true'
