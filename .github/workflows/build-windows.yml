@@ -9,8 +9,12 @@ env:
   IS_GITHUB_SIGNING_ALLOWED: false
 
 jobs:
-  buildwindows:
+  build-windows:
     runs-on: windows-2019
+
+    outputs:
+      asset_name: ${{ steps.cert.outputs.asset_name }}
+      github_repository: ${{ steps.cert.outputs.github_repository }}
 
     steps:
 #     - name: Install Qt
@@ -294,8 +298,8 @@ jobs:
           echo "IS_CERT_AVAILABLE=false" >> $GITHUB_ENV
         fi
         # outputs for reusable workflow
-        echo "ASSET_NAME=$(ls *.exe)" >> $GITHUB_OUTPUT
-        echo "GITHUB_REPOSITORY=${{ env.GITHUB_REPOSITORY }}" >> $GITHUB_OUTPUT
+        echo "asset_name=$(ls *.exe)" >> $GITHUB_OUTPUT
+        echo "github_repository=${{ env.GITHUB_REPOSITORY }}" >> $GITHUB_OUTPUT
       shell: bash
       env:
         CERT_BODY: ${{ secrets.CERT_BODY }}
@@ -329,11 +333,12 @@ jobs:
         path: _build/complete/_deploy/*.whl
 
   call-sign:
-    needs: buildwindows
+    needs: build-windows
     uses: ./.github/workflows/sign-windows.yml
     secrets:
       token: ${{ secrets.JENKINS_TOKEN_GH_RELEASE }}    
     with:
       artifact_name: 'windows-setup'
-      asset_name: ${{ needs.buildwindows.outputs.ASSET_NAME }}
-      repository_name: ${{ needs.buildwindows.outputs.GITHUB_REPOSITORY }}
+      asset_name: ${{ needs.build-windows.outputs.asset_name }}
+      github_repository: ${{ needs.build-windows.outputs.github_repository }}
+

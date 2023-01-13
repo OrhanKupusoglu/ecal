@@ -15,7 +15,7 @@ on:
         description: 'Released binary asset''s name'
         required: true
         type: string
-      repository_name:
+      github_repository:
         description: 'Repository name as OWNER/REPO'
         required: true
         type: string                
@@ -42,14 +42,14 @@ jobs:
         echo "JENKINS_TOKEN=${{ env.JENKINS_TOKEN }}" >> $GITHUB_ENV
         echo "ARTIFACT_NAME=${{ env.ARTIFACT_NAME }}" >> $GITHUB_ENV
         echo "ASSET_NAME=${{ env.ASSET_NAME }}" >> $GITHUB_ENV
-        echo "REPOSITORY_NAME=${{ env.REPOSITORY_NAME }}" >> $GITHUB_ENV
+        echo "GITHUB_REPOSITORY=${{ env.GITHUB_REPOSITORY }}" >> $GITHUB_ENV
         mkdir -p _build/complete/_deploy
       shell: bash
       env:
         JENKINS_TOKEN: ${{ secrets.token }}
         ARTIFACT_NAME: ${{ inputs.artifact_name }}
         ASSET_NAME: ${{ inputs.asset_name }}
-        REPOSITORY_NAME: ${{ inputs.repository_name }}
+        GITHUB_REPOSITORY: ${{ inputs.github_repository }}
 
     - name: Download artifact
       if: env.IS_JENKINS_SIGNING_ALLOWED == 'true'
@@ -87,7 +87,7 @@ jobs:
         #echo "TEMP_RELEASE_ASSETS=${TEMP_RELEASE_ASSETS}" >> $GITHUB_ENV
         echo "TEMP_ASSET_DOWNLOAD_URL=${TEMP_ASSET_DOWNLOAD_URL}" >> $GITHUB_ENV
 
-        echo "-- Repository         : ${{ env.REPOSITORY_NAME }}"
+        echo "-- Repository         : ${{ env.GITHUB_REPOSITORY }}"
         echo "-- Release URL        : ${TEMP_RELEASE_URL}"
         echo "-- Release ID         : ${TEMP_RELEASE_ID}"
         echo "-- Release upload URL : ${TEMP_RELEASE_UPLOAD_URL}"
@@ -256,7 +256,7 @@ jobs:
         gh api \
           --method DELETE \
           -H "Accept: application/vnd.github+json" \
-          "/repos/${{ env.REPOSITORY_NAME }}/releases/${{ env.TEMP_RELEASE_ID }}"
+          "/repos/${{ env.GITHUB_REPOSITORY }}/releases/${{ env.TEMP_RELEASE_ID }}"
       shell: bash
 
     - name: Upload Windows setup signed on Eclipse CI
