@@ -3,8 +3,11 @@ name: Sign Windows installer on Jenkins CI
 on:
   workflow_call:
     secrets:
-      token:
+      jenkins_token:
         description: 'Token for the Jenkins job'
+        required: true  
+      gh_token:
+        description: 'Token for GitHub CLI'
         required: true  
     inputs:
       artifact_name:
@@ -47,7 +50,7 @@ jobs:
         mkdir -p _build/complete/_deploy
       shell: bash
       env:
-        JENKINS_TOKEN: ${{ secrets.token }}
+        JENKINS_TOKEN: ${{ secrets.jenkins_token }}
         ARTIFACT_NAME: ${{ inputs.artifact_name }}
         ASSET_NAME: ${{ inputs.asset_name }}
         GITHUB_REPOSITORY: ${{ inputs.github_repository }}
@@ -110,7 +113,7 @@ jobs:
         JENKINS_BASE_URL="https://ci.eclipse.org/ecal/job/${JENKINS_JOB}"
         JENKINS_TRIGGER_URL="${JENKINS_BASE_URL}/buildWithParameters?token=${TOKEN}&GH_RELEASE_ID=${RELEASE_ID}&GH_ASSET_URL=${ASSET_URL}"
         JENKINS_STATUS_URL="${JENKINS_BASE_URL}/lastBuild/api/json"
-        JENKINS_DOWNLOAD_URL="${JENKINS_BASE_URL}/lastSuccessfulBuild/artifact"
+        #JENKINS_DOWNLOAD_URL="${JENKINS_BASE_URL}/lastSuccessfulBuild/artifact"
         WAIT_FOR_JENKINS_SEC=5
         STATUS_JSON=status.json
         NEW_BUILD=0
@@ -234,7 +237,7 @@ jobs:
         done
 
         printf -- "-- download the newly-signed Windows installer\n"
-        JENKINS_DOWNLOAD_URL="${JENKINS_DOWNLOAD_URL}/${ASSET_NAME}"
+        JENKINS_DOWNLOAD_URL="${JENKINS_BASE_URL}/${NEW_BUILD}/artifact/${ASSET_NAME}"
         RESPONSE_CODE=$(curl -s -S -O -w "%{response_code}" "${JENKINS_DOWNLOAD_URL}")
         printf -- "    ++ download - HTTP status code: %s\n" "${RESPONSE_CODE}" 
         if [[ ${RESPONSE_CODE} -ge 200 && ${RESPONSE_CODE} -lt 300 ]]
@@ -259,6 +262,8 @@ jobs:
           -H "Accept: application/vnd.github+json" \
           "/repos/${{ env.GITHUB_REPOSITORY }}/releases/${{ env.TEMP_RELEASE_ID }}"
       shell: bash
+      env:
+        GITHUB_TOKEN: ${{ secrets.gh_token }}
 
     - name: Upload Windows setup signed on Eclipse CI
       if: env.IS_DOWNLOAD_AVAILABLE == 'true'
