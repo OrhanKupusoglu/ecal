@@ -92,8 +92,10 @@ jobs:
         echo "TEMP_ASSET_DOWNLOAD_URL=${TEMP_ASSET_DOWNLOAD_URL}" >> $GITHUB_ENV
 
         echo "-- Repository         : ${{ env.GITHUB_REPOSITORY }}"
-        echo "-- Release URL        : ${TEMP_RELEASE_URL}"
         echo "-- Release ID         : ${TEMP_RELEASE_ID}"
+        echo "-- Release Name       : ${TEMP_RELEASE_NAME}"
+        echo "-- Release Tag        : ${TEMP_RELEASE_TAG}"
+        echo "-- Release URL        : ${TEMP_RELEASE_URL}"
         echo "-- Release upload URL : ${TEMP_RELEASE_UPLOAD_URL}"
         echo "-- Release assets     : ${TEMP_RELEASE_ASSETS}"
         echo "-- Asset download URL : ${TEMP_ASSET_DOWNLOAD_URL}"
