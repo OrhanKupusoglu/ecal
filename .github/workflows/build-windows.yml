@@ -300,7 +300,7 @@ jobs:
         # outputs for the reusable workflow
         ASSET_NAME=$(ls *.exe)
         echo "asset_name=${ASSET_NAME}" >> $GITHUB_OUTPUT
-        echo "github_repository=${{ env.GITHUB_REPOSITORY }}" >> $GITHUB_OUTPUT
+        echo "github_repository=${GITHUB_REPOSITORY}" >> $GITHUB_OUTPUT
       shell: bash
       env:
         CERT_BODY: ${{ secrets.CERT_BODY }}
