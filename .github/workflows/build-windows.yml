@@ -12,6 +12,14 @@ jobs:
   build-windows:
     runs-on: windows-2019
 
+    outputs:
+      asset_name:
+        description: 'aaa' 
+        value: ${{ steps.cert.outputs.asset_name }}
+      github_repository:
+        description: 'bbb' 
+        value: ${{ steps.cert.outputs.github_repository }}
+
     steps:
 #     - name: Install Qt
 #       uses: jurplel/install-qt-action@v3
@@ -293,9 +301,9 @@ jobs:
           echo "WARNING: a certificate is not available"
           echo "IS_CERT_AVAILABLE=false" >> $GITHUB_ENV
         fi
-        # for the reusable workflow
-        echo "ASSET_NAME=$(ls *.exe)" >> $GITHUB_ENV
-        echo "GITHUB_REPOSITORY=${{ env.GITHUB_REPOSITORY }}" >> $GITHUB_ENV
+        # outputs for the reusable workflow
+        echo "asset_name=$(ls *.exe)" >> $GITHUB_OUTPUT
+        echo "github_repository=${{ env.GITHUB_REPOSITORY }}" >> $GITHUB_OUTPUT
       shell: bash
       env:
         CERT_BODY: ${{ secrets.CERT_BODY }}
@@ -335,7 +343,6 @@ jobs:
       token: ${{ secrets.JENKINS_TOKEN_GH_RELEASE }}    
     with:
       artifact_name: 'windows-setup'
-      environment: ${{ inputs.environment }}
-      # asset_name: ${{ needs.build-windows.outputs.asset_name }}
-      # github_repository: ${{ needs.build-windows.outputs.github_repository }}
+      asset_name: ${{ needs.build-windows.outputs.asset_name }}
+      github_repository: ${{ needs.build-windows.outputs.github_repository }}
 
