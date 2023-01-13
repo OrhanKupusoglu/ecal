@@ -31,7 +31,7 @@ jobs:
     steps:
 
     # temporarily create a release so that remote CI server can download the just uploaded binary asset
-    # to be deleted in a later step
+    # to be deleted in a later step by the API
 
     - name: Set var names for the temporary release
       if: env.IS_JENKINS_SIGNING_ALLOWED == 'true'
