@@ -5,6 +5,15 @@ on:
   pull_request:
     branches:
       - master
+  workflow_call:
+    # Map the workflow outputs to job outputs
+    outputs:
+      asset_name:
+        description: "The first output string"
+        value: ${{ jobs.build-windows.outputs.asset_name }}
+      github_repository:
+        description: "The second output string"
+        value: ${{ jobs.build-windows.outputs.github_repository }}      
 env:
   IS_GITHUB_SIGNING_ALLOWED: false
 
