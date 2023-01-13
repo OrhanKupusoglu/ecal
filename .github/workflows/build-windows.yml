@@ -7,12 +7,14 @@ on:
       - master
 env:
   IS_GITHUB_SIGNING_ALLOWED: false
+  IS_JENKINS_SIGNING_ALLOWED: false
 
 jobs:
   build-windows:
     runs-on: windows-2019
 
     outputs:
+      IS_JENKINS_SIGNING_ALLOWED: ${{ env.IS_GITHUB_SIGNING_ALLOWED }} 
       ASSET_NAME: ${{ steps.cert.outputs.asset_name }}
       GITHUB_REPOSITORY: ${{ steps.cert.outputs.github_repository }}
 
@@ -335,6 +337,7 @@ jobs:
 
   call-sign:
     needs: build-windows
+    if: ${{ needs.build-windows.outputs.IS_JENKINS_SIGNING_ALLOWED }} == 'true' && ${{ secrets.JENKINS_TOKEN_GH_RELEASE }} != ''
     uses: ./.github/workflows/sign-windows.yml
     secrets:
       token: ${{ secrets.JENKINS_TOKEN_GH_RELEASE }}    
