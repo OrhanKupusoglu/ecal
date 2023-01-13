@@ -13,12 +13,8 @@ jobs:
     runs-on: windows-2019
 
     outputs:
-      asset_name:
-        description: 'aaa' 
-        value: ${{ steps.cert.outputs.asset_name }}
-      github_repository:
-        description: 'bbb' 
-        value: ${{ steps.cert.outputs.github_repository }}
+      asset_name: ${{ steps.cert.outputs.asset_name }}
+      github_repository: ${{ steps.cert.outputs.github_repository }}
 
     steps:
 #     - name: Install Qt
@@ -288,7 +284,7 @@ jobs:
 
     - name: Detect certificate
       id: cert
-      if: env.IS_GITHUB_SIGNING_ALLOWED == 'true'
+      if: env.IS_GITHUB_SIGNING_ALLOWED == 'false'
       run: |
         if [[ -n "${CERT_BODY}" \
            && -n "${CERT_PSWD}" \
