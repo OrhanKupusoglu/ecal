@@ -5,15 +5,6 @@ on:
   pull_request:
     branches:
       - master
-  workflow_call:
-    # Map the workflow outputs to job outputs
-    outputs:
-      asset_name:
-        description: "The first output string"
-        value: ${{ jobs.build-windows.outputs.asset_name }}
-      github_repository:
-        description: "The second output string"
-        value: ${{ jobs.build-windows.outputs.github_repository }}      
 env:
   IS_GITHUB_SIGNING_ALLOWED: false
 
@@ -307,8 +298,9 @@ jobs:
           echo "IS_CERT_AVAILABLE=false" >> $GITHUB_ENV
         fi
         # outputs for the reusable workflow
-        echo "asset_name=$(ls *.exe)" >> $GITHUB_OUTPUT
-        echo "github_repository=${{ env.GITHUB_REPOSITORY }}" >> $GITHUB_OUTPUT
+        LS_EXE=$(ls *.exe)
+        echo "::set-output name=asset_name::${LS_EXE}"
+        echo "::set-output name=github_repository::${{ env.GITHUB_REPOSITORY }}"
       shell: bash
       env:
         CERT_BODY: ${{ secrets.CERT_BODY }}
