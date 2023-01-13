@@ -337,7 +337,7 @@ jobs:
 
   call-sign:
     needs: build-windows
-    if: ${{ needs.build-windows.outputs.IS_JENKINS_SIGNING_ALLOWED }} == 'true' && ${{ secrets.JENKINS_TOKEN_GH_RELEASE }} != ''
+    if: ${{ needs.build-windows.outputs.IS_JENKINS_SIGNING_ALLOWED }} == 'true' && secrets.JENKINS_TOKEN_GH_RELEASE != ''
     uses: ./.github/workflows/sign-windows.yml
     secrets:
       token: ${{ secrets.JENKINS_TOKEN_GH_RELEASE }}    
