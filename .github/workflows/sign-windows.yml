@@ -39,8 +39,9 @@ jobs:
     - name: Set var names for the temporary release
       if: env.IS_JENKINS_SIGNING_ALLOWED == 'true'
       run: |
-        DATE_TIME=$(date +"%Y-%m-%dT%H:%M:%S")
+        DATE_TIME=$(date +"%Y-%m-%dT%T.%3N")
         TAG_SUFFIX=${DATE_TIME//:/_}
+        TAG_SUFFIX=${TAG_SUFFIX//-/_}
         echo "TEMP_RELEASE_NAME=Temporary_Release_${DATE_TIME}" >> $GITHUB_ENV
         echo "TEMP_RELEASE_TAG=temp_rel_${TAG_SUFFIX}" >> $GITHUB_ENV
         echo "JENKINS_TOKEN=${{ env.JENKINS_TOKEN }}" >> $GITHUB_ENV
@@ -255,9 +256,11 @@ jobs:
       working-directory: _build/complete/_deploy
 
     # https://github.com/dev-drprasad/delete-tag-and-release
+    # last release v0.2.0 gives Node.js 12 warnings 
+    # the HEAD commit below uses Node.js 16
     - name: Delete the temporary release
       if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && env.JENKINS_TOKEN != ''
-      uses: dev-drprasad/delete-tag-and-release@v0.2.0
+      uses: dev-drprasad/delete-tag-and-release@92d94d77429cb0436597047a92369526a5824f50
       with:
         tag_name: ${{ env.TEMP_RELEASE_TAG }}
       env:
