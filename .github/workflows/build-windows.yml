@@ -327,7 +327,7 @@ jobs:
   # --------------------------------------------------------------------------------------------------
 
     - name: Set var names for the temporary release
-      if: env.IS_JENKINS_SIGNING_ALLOWED == 'true'
+      if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && env.JENKINS_TOKEN != ''
       run: |
         DATE_TIME=$(date +"%Y-%m-%dT%T.%3N")
         TAG_SUFFIX=${DATE_TIME//:/_}
@@ -335,12 +335,15 @@ jobs:
         echo "TEMP_RELEASE_NAME=Temporary_Release_${DATE_TIME}" >> $GITHUB_ENV
         echo "TEMP_RELEASE_TAG=temp_rel_${TAG_SUFFIX}" >> $GITHUB_ENV
         echo "ASSET_NAME=$(ls *.exe)" >> $GITHUB_ENV
+        echo "IS_JENKINS_SIGNING_ENABLED=true" >> $GITHUB_ENV
       shell: bash
       working-directory: _build/complete/_deploy
+      env:
+        JENKINS_TOKEN: ${{ secrets.JENKINS_TOKEN_GH_RELEASE }}
     
     # https://github.com/softprops/action-gh-release
     - name: Create a temporary release
-      if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && secrets.JENKINS_TOKEN_GH_RELEASE != ''
+      if: env.IS_JENKINS_SIGNING_ENABLED == 'true'
       id: temp_rel
       uses: softprops/action-gh-release@v0.1.15
       with:
@@ -353,7 +356,7 @@ jobs:
         files: _build/complete/_deploy/${{ env.ASSET_NAME }}
 
     - name: Collect data about the temporary release
-      if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && secrets.JENKINS_TOKEN_GH_RELEASE != ''
+      if: env.IS_JENKINS_SIGNING_ENABLED == 'true'
       run: |
         TEMP_RELEASE_URL="${{ steps.temp_rel.outputs.url }}"
         TEMP_RELEASE_ID="${{ steps.temp_rel.outputs.id }}"
@@ -376,13 +379,13 @@ jobs:
       shell: bash
 
     - name: Sign the installer on Eclipse CI
-      if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && secrets.JENKINS_TOKEN_GH_RELEASE != ''
+      if: env.IS_JENKINS_SIGNING_ENABLED == 'true'
       run: |
         export LC_CTYPE=en_US.utf8
 
         ASSET_NAME_OLD="${ASSET_NAME}.old"
         JENKINS_JOB='gh_auto_release'
-        TOKEN="${JENKINS_TOKEN}"
+        TOKEN="${{ secrets.JENKINS_TOKEN_GH_RELEASE }}"
         RELEASE_ID="${TEMP_RELEASE_ID}"
         ASSET_URL=$(echo "${TEMP_ASSET_DOWNLOAD_URL}" | base64 --wrap 0)
         JENKINS_BASE_URL="https://ci.eclipse.org/ecal/job/${JENKINS_JOB}"
@@ -530,12 +533,10 @@ jobs:
     # last release v0.2.0 gives Node v12 warnings 
     # the commit below uses Node v16 and suppresses these warnings
     - name: Delete the temporary release
-      if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && secrets.JENKINS_TOKEN_GH_RELEASE != ''
+      if: env.IS_JENKINS_SIGNING_ENABLED == 'true'
       uses: dev-drprasad/delete-tag-and-release@92d94d77429cb0436597047a92369526a5824f50
       with:
         tag_name: ${{ env.TEMP_RELEASE_TAG }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Upload Windows setup signed on Eclipse CI
       if: env.IS_DOWNLOAD_AVAILABLE == 'true'
