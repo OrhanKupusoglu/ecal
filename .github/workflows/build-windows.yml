@@ -369,6 +369,8 @@ jobs:
         echo "TEMP_ASSET_DOWNLOAD_URL=${TEMP_ASSET_DOWNLOAD_URL}" >> $GITHUB_ENV
 
         echo "-- Repository         : ${GITHUB_REPOSITORY}"
+        echo "-- Branch             : ${GITHUB_REF}"
+        echo "-- HEAD               : ${GITHUB_SHA}"
         echo "-- Release ID         : ${TEMP_RELEASE_ID}"
         echo "-- Release name       : ${TEMP_RELEASE_NAME}"
         echo "-- Release tag        : ${TEMP_RELEASE_TAG}"
