@@ -351,6 +351,7 @@ jobs:
         prerelease: true
         generate_release_notes: false
         append_body: false
+        target_commitish: ${{ env.GITHUB_SHA }}
         name: ${{ env.TEMP_RELEASE_NAME }}
         tag_name: ${{ env.TEMP_RELEASE_TAG }}
         files: _build/complete/_deploy/${{ env.ASSET_NAME }}
@@ -537,6 +538,8 @@ jobs:
       uses: dev-drprasad/delete-tag-and-release@92d94d77429cb0436597047a92369526a5824f50
       with:
         tag_name: ${{ env.TEMP_RELEASE_TAG }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Upload Windows setup signed on Eclipse CI
       if: env.IS_DOWNLOAD_AVAILABLE == 'true'
