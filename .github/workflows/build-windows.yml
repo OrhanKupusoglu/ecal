@@ -536,7 +536,8 @@ jobs:
     # last release v0.2.0 gives Node v12 warnings 
     # the commit below uses Node v16 and suppresses these warnings
     - name: Delete the temporary release
-      if: env.IS_JENKINS_SIGNING_ENABLED == 'true'
+      # always() calls the step even when action is cancelled
+      if: (success() || failure()) && env.IS_JENKINS_SIGNING_ENABLED == 'true'
       uses: dev-drprasad/delete-tag-and-release@92d94d77429cb0436597047a92369526a5824f50
       with:
         tag_name: ${{ env.TEMP_RELEASE_TAG }}
