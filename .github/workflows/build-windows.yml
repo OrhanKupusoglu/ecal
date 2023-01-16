@@ -329,7 +329,7 @@ jobs:
         echo "ASSET_NAME=$(ls *.exe)" >> $GITHUB_ENV
         echo "IS_JENKINS_SIGNING_ENABLED=true" >> $GITHUB_ENV
       shell: bash
-      working-directory: _build/complete/_deploy
+      working-directory: ${{ runner.workspace }}\_build\complete\_deploy
       env:
         JENKINS_TOKEN: ${{ secrets.JENKINS_TOKEN_GH_RELEASE }}
     
