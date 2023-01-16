@@ -305,13 +305,13 @@ jobs:
         debug: false
 
     - name: Upload Windows setup
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v3.1.2
       with:
         name: windows-setup
         path: ${{ runner.workspace }}/_build/complete/_deploy/*.exe
 
     - name: Upload Python Wheels
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v3.1.2
       with:
         name: windows-python-wheels
         path: ${{ runner.workspace }}/_build/complete/_deploy/*.whl
@@ -346,7 +346,7 @@ jobs:
         target_commitish: ${{ env.GITHUB_SHA }}
         name: ${{ env.TEMP_RELEASE_NAME }}
         tag_name: ${{ env.TEMP_RELEASE_TAG }}
-        files: ${{ runner.workspace }}\_build\complete\_deploy\${{ env.ASSET_NAME }}
+        files: .\_build\complete\_deploy\${{ env.ASSET_NAME }}
 
     - name: Collect data about the temporary release
       if: env.IS_JENKINS_SIGNING_ENABLED == 'true'
@@ -538,7 +538,7 @@ jobs:
 
     - name: Upload Windows setup signed on Eclipse CI
       if: env.IS_DOWNLOAD_AVAILABLE == 'true'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v3.1.2
       with:
         name: windows-setup-eclipse
         path: _build/complete/_deploy/${{ env.ASSET_NAME }}
