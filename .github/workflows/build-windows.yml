@@ -326,10 +326,8 @@ jobs:
         TAG_SUFFIX=${TAG_SUFFIX//-/_}
         echo "TEMP_RELEASE_NAME=Temporary_Release_${DATE_TIME}" >> $GITHUB_ENV
         echo "TEMP_RELEASE_TAG=temp_rel_${TAG_SUFFIX}" >> $GITHUB_ENV
-        echo "ASSET_NAME=$(ls *.exe)" >> $GITHUB_ENV
         echo "IS_JENKINS_SIGNING_ENABLED=true" >> $GITHUB_ENV
       shell: bash
-      working-directory: ${{ runner.workspace }}\_build\complete\_deploy
       env:
         JENKINS_TOKEN: ${{ secrets.JENKINS_TOKEN_GH_RELEASE }}
     
@@ -346,7 +344,7 @@ jobs:
         target_commitish: ${{ env.GITHUB_SHA }}
         name: ${{ env.TEMP_RELEASE_NAME }}
         tag_name: ${{ env.TEMP_RELEASE_TAG }}
-        files: _build/complete/_deploy/${{ env.ASSET_NAME }}
+        files: _build/complete/_deploy/*.exe
 
     - name: Collect data about the temporary release
       if: env.IS_JENKINS_SIGNING_ENABLED == 'true'
@@ -356,9 +354,11 @@ jobs:
         TEMP_RELEASE_UPLOAD_URL="${{ steps.temp_rel.outputs.upload_url }}"
         TEMP_RELEASE_ASSETS="${{ steps.temp_rel.outputs.assets }}"
         TEMP_ASSET_DOWNLOAD_URL="${{ fromJSON(steps.temp_rel.outputs.assets)[0].browser_download_url }}"
+        ASSET_NAME=$(basename "${TEMP_ASSET_DOWNLOAD_URL}")
 
         echo "TEMP_RELEASE_ID=${TEMP_RELEASE_ID}" >> $GITHUB_ENV
         echo "TEMP_ASSET_DOWNLOAD_URL=${TEMP_ASSET_DOWNLOAD_URL}" >> $GITHUB_ENV
+        echo "ASSET_NAME=${ASSET_NAME}" >> $GITHUB_ENV
 
         echo "-- Repository         : ${GITHUB_REPOSITORY}"
         echo "-- Branch             : ${GITHUB_REF}"
