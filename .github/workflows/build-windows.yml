@@ -329,7 +329,7 @@ jobs:
         echo "ASSET_NAME=$(ls *.exe)" >> $GITHUB_ENV
         echo "IS_JENKINS_SIGNING_ENABLED=true" >> $GITHUB_ENV
       shell: bash
-      working-directory: ${{ runner.workspace }}\_build\complete\_deploy
+      working-directory: ./_build/complete/_deploy
       env:
         JENKINS_TOKEN: ${{ secrets.JENKINS_TOKEN_GH_RELEASE }}
     
@@ -346,7 +346,7 @@ jobs:
         target_commitish: ${{ env.GITHUB_SHA }}
         name: ${{ env.TEMP_RELEASE_NAME }}
         tag_name: ${{ env.TEMP_RELEASE_TAG }}
-        files: .\_build\complete\_deploy\${{ env.ASSET_NAME }}
+        files: ./_build/complete/_deploy/${{ env.ASSET_NAME }}
 
     - name: Collect data about the temporary release
       if: env.IS_JENKINS_SIGNING_ENABLED == 'true'
@@ -522,7 +522,7 @@ jobs:
           exit 1
         fi
       shell: bash
-      working-directory: ${{ runner.workspace }}\_build\complete\_deploy
+      working-directory: ./_build/complete/_deploy
 
     # https://github.com/dev-drprasad/delete-tag-and-release
     # last release v0.2.0 gives Node v12 warnings 
@@ -541,4 +541,4 @@ jobs:
       uses: actions/upload-artifact@v3.1.2
       with:
         name: windows-setup-eclipse
-        path: _build/complete/_deploy/${{ env.ASSET_NAME }}
+        path: ./_build/complete/_deploy/${{ env.ASSET_NAME }}
