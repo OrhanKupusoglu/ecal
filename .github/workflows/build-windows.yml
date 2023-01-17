@@ -368,16 +368,16 @@ jobs:
         Write-Output "TEMP_RELEASE_ID=$TEMP_RELEASE_ID" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
         Write-Output "TEMP_ASSET_DOWNLOAD_URL=$TEMP_ASSET_DOWNLOAD_URL" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
 
-        Write-Output "-- Repository         : $GITHUB_REPOSITORY"
-        Write-Output "-- Branch             : $GITHUB_REF"
-        Write-Output "-- HEAD               : $GITHUB_SHA" 
+        Write-Output "-- Repository         : $Env:GITHUB_REPOSITORY"
+        Write-Output "-- Branch             : $Env:GITHUB_REF"
+        Write-Output "-- HEAD               : $Env:GITHUB_SHA" 
         Write-Output "-- Release ID         : $TEMP_RELEASE_ID"
-        Write-Output "-- Release name       : $TEMP_RELEASE_NAME"
-        Write-Output "-- Release tag        : $TEMP_RELEASE_TAG"
+        Write-Output "-- Release name       : $Env:TEMP_RELEASE_NAME"
+        Write-Output "-- Release tag        : $Env:TEMP_RELEASE_TAG"
         Write-Output "-- Release URL        : $TEMP_RELEASE_URL"
         Write-Output "-- Release upload URL : $TEMP_RELEASE_UPLOAD_URL"
         Write-Output "-- Release assets     : $TEMP_RELEASE_ASSETS"
-        Write-Output "-- Asset name         : $ASSET_NAME"
+        Write-Output "-- Asset name         : $Env:ASSET_NAME"
         Write-Output "-- Asset download URL : $TEMP_ASSET_DOWNLOAD_URL"
 
     - name: Sign the installer on Eclipse CI
