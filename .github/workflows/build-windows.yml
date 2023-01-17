@@ -317,9 +317,12 @@ jobs:
 
     - name: Create binaries
       run: |
-        mkdir _build | cd
-        mkdir complete | cd
-        mkdir _deploy | cd
+        mkdir _build
+        cd _build
+        mkdir complete
+        cd complete
+        mkdir _deploy
+        cd _deploy
         echo "temporary test binary" > "ecal-5.11.0-win64.exe" 
         echo "temporary test binary" > "ecal-5.11.0-win64.whl" 
         pwd
