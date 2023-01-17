@@ -494,7 +494,8 @@ jobs:
           Exit 1
         }
       env:
-        JENKINS_TOKEN: ${{ secrets.JENKINS_TOKEN_GH_RELEASE }}      
+        JENKINS_TOKEN: ${{ secrets.JENKINS_TOKEN_GH_RELEASE }}  
+      shell: pwsh
       working-directory: ${{ runner.workspace }}/_build/complete/_deploy
 
     # https://github.com/dev-drprasad/delete-tag-and-release
