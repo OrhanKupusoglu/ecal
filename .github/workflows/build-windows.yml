@@ -323,7 +323,7 @@ jobs:
         echo "temporary test binary" > "ecal-5.11.0-win64.exe" 
         echo "temporary test binary" > "ecal-5.11.0-win64.whl" 
         pwd
-        ls -l
+        ls
       shell: pwsh
 
     - name: Set var names for the temporary release
