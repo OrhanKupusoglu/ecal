@@ -394,7 +394,6 @@ jobs:
         $JENKINS_BASE_URL = "https://ci.eclipse.org/ecal/job/$JENKINS_JOB"
         $JENKINS_TRIGGER_URL = "$JENKINS_BASE_URL/buildWithParameters?token=$TOKEN&GH_RELEASE_ID=$RELEASE_ID&GH_ASSET_URL=$ASSET_URL"
         $WAIT_FOR_JENKINS_SEC = 5
-        $STATUS_JSON = status.json
         $NEW_BUILD = 0
         $COUNTER_LIMIT = 20
         $RESPONSE_CODE = 0
