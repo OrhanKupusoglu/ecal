@@ -385,7 +385,7 @@ jobs:
     - name: Sign the installer on Eclipse CI
       if: env.IS_JENKINS_SIGNING_ENABLED == 'true'
       run: |
-        $ASSET_NAME_OLD = "$Env:ASSET_NAME.old"
+        $ASSET_NAME_OLD = "$Env:ASSET_NAME".old
         $JENKINS_JOB = 'gh_auto_release'
         $TOKEN = "$JENKINS_TOKEN"
         $RELEASE_ID = "$TEMP_RELEASE_ID"
