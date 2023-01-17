@@ -415,7 +415,7 @@ jobs:
 
         if ($RES_CODE -ge 200 -and $RES_CODE -lt 300) {
           $QUEUE_URL = $RESPONSE.Headers.location
-          $QUEUE_URL = "$QUEUE_URL/api/json/" 
+          $QUEUE_URL = "$($QUEUE_URL)api/json/" 
           Write-Output "    ++ queue URL: $QUEUE_URL"
         } else {
           Write-Output "    ** trigger failure"
@@ -493,8 +493,9 @@ jobs:
           }
         }
 
-        Write-Output "-- download the newly-signed Windows installer from #Build $BUILD_NUM"
         $JENKINS_DOWNLOAD_URL = "$JENKINS_BASE_URL/$BUILD_NUM/artifact/$Env:ASSET_NAME"
+        Write-Output "-- download the newly-signed Windows installer from #Build $BUILD_NUM"
+        Write-Output "-- download the newly-signed Windows installer: '$JENKINS_DOWNLOAD_URL'"
         $RESPONSE = Invoke-WebRequest -Uri $JENKINS_DOWNLOAD_URL -OutFile $Env:ASSET_NAME
         $RES_CODE = $RESPONSE.StatusCode
         Write-Output "    ++ download installer - HTTP status code: $RESPONSE_CODE"
