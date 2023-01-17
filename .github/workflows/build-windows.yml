@@ -353,11 +353,11 @@ jobs:
     - name: Collect data about the temporary release
       if: env.IS_JENKINS_SIGNING_ENABLED == 'true'
       run: |
-        TEMP_RELEASE_URL = "${{ steps.temp_rel.outputs.url }}"
-        TEMP_RELEASE_ID = "${{ steps.temp_rel.outputs.id }}"
-        TEMP_RELEASE_UPLOAD_URL = "${{ steps.temp_rel.outputs.upload_url }}"
-        TEMP_RELEASE_ASSETS = "${{ steps.temp_rel.outputs.assets }}"
-        TEMP_ASSET_DOWNLOAD_URL = "${{ fromJSON(steps.temp_rel.outputs.assets)[0].browser_download_url }}"
+        $TEMP_RELEASE_URL = "${{ steps.temp_rel.outputs.url }}"
+        $TEMP_RELEASE_ID = "${{ steps.temp_rel.outputs.id }}"
+        $TEMP_RELEASE_UPLOAD_URL = "${{ steps.temp_rel.outputs.upload_url }}"
+        $TEMP_RELEASE_ASSETS = "${{ steps.temp_rel.outputs.assets }}"
+        $TEMP_ASSET_DOWNLOAD_URL = "${{ fromJSON(steps.temp_rel.outputs.assets)[0].browser_download_url }}"
 
         Write-Output "TEMP_RELEASE_ID=$TEMP_RELEASE_ID" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
         Write-Output "TEMP_ASSET_DOWNLOAD_URL=$TEMP_ASSET_DOWNLOAD_URL" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
@@ -507,7 +507,7 @@ jobs:
       with:
         tag_name: ${{ env.TEMP_RELEASE_TAG }}
       env:
-        GITHUB_TOKEN: ${{ secrets.gh_token }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Upload Windows setup signed on Eclipse CI
       if: env.IS_DOWNLOAD_AVAILABLE == 'true'
