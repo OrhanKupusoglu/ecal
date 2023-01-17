@@ -437,7 +437,8 @@ jobs:
           Write-Output "    ++ build number retrieval - HTTP status code: $RES_CODE"
 
           if ($RES_CODE -ge 200 -and $RES_CODE -lt 300) {
-            $NEW_BUILD = ConvertFrom-Json $RESPONSE.Content  | Select-Object -expand $KEY_NUMBER
+            $JSON_CONTENT = $RESPONSE.Content | ConvertFrom-Json
+            $NEW_BUILD = $JSON_CONTENT.$KEY_NUMBER
 
             if ($NEW_BUILD) {
               Write-Output "    ++ #build number: $NEW_BUILD"
