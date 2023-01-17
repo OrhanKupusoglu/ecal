@@ -293,7 +293,7 @@ jobs:
 
     - name: Detect certificate
       id: cert
-      if: env.IS_GITHUB_SIGNING_ALLOWED == 'true'
+      if: env.IS_GITHUB_SIGNING_ALLOWED == 'false'
       run: |
         if ($Env:CERT_BODY -and $Env:CERT_PSWD -and $Env:CERT_ALGO -and $Env:CERT_HASH) {
           Write-Output "ATTENTION: a certificate is available"
