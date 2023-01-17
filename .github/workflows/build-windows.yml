@@ -283,10 +283,9 @@ jobs:
            && -n "${CERT_HASH}" ]]
         then
           echo "ATTENTION: a certificate is available"
-          echo "IS_CERT_AVAILABLE=true" >> $GITHUB_ENV
+          echo "IS_GITHUB_SIGNING_ENABLED=true" >> $GITHUB_ENV
         else
           echo "WARNING: a certificate is not available"
-          echo "IS_CERT_AVAILABLE=false" >> $GITHUB_ENV
         fi
         # outputs for the reusable workflow
         ASSET_NAME=$(ls *.exe)
@@ -298,11 +297,11 @@ jobs:
         CERT_PSWD: ${{ secrets.CERT_PSWD }}
         CERT_ALGO: ${{ secrets.CERT_ALGO }}
         CERT_HASH: ${{ secrets.CERT_HASH }}
-      working-directory: _build/complete/_deploy        
+      working-directory: _build\complete\_deploy        
 
     # https://github.com/OrhanKupusoglu/code-sign-action
     - name: Sign the installer
-      if: env.IS_GITHUB_SIGNING_ALLOWED == 'true' && env.IS_CERT_AVAILABLE == 'true'
+      if: env.IS_GITHUB_SIGNING_ENABLED == 'true'
       uses: OrhanKupusoglu/code-sign-action@v5.5.1
       with:
         cert_body: ${{ secrets.CERT_BODY }}
