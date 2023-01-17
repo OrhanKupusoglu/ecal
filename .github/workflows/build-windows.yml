@@ -464,7 +464,7 @@ jobs:
           $RESPONSE = Invoke-WebRequest -Uri $JENKINS_STATUS_URL
           $RES_CODE = $RESPONSE.StatusCode
           Write-Output "    ++ status check - HTTP status code: $RES_CODE"
-
+          ConvertFrom-Json $RESPONSE.Content
           if ($RES_CODE -ge 200 -and $RES_CODE -lt 300) {
             $CONTENT = ConvertFrom-Json $RESPONSE.Content
             $NUMBER = $CONTENT | Select-Object -expand $KEY_NUMBER
