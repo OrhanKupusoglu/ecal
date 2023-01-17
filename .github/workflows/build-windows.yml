@@ -14,322 +14,324 @@ jobs:
     runs-on: windows-2019
 
     steps:
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v3
-      with:
-        setup-python: 'false'
-        version: '5.15.2'
-        target: 'desktop'
-        arch: 'win64_msvc2015_64'
+#     - name: Install Qt
+#       uses: jurplel/install-qt-action@v3
+#       with:
+#         setup-python: 'false'
+#         version: '5.15.2'
+#         target: 'desktop'
+#         arch: 'win64_msvc2015_64'
 
-    # Downgrading nuget is required as of 2021-04-23, as nuget 5.9.1.111 fails installing protobuf
-    # https://github.com/actions/virtual-environments/issues/3240
-    - name: Downgrade nuget
-      uses: nuget/setup-nuget@v1
-      with:
-        nuget-version: '5.8.x'
+#     # Downgrading nuget is required as of 2021-04-23, as nuget 5.9.1.111 fails installing protobuf
+#     # https://github.com/actions/virtual-environments/issues/3240
+#     - name: Downgrade nuget
+#       uses: nuget/setup-nuget@v1
+#       with:
+#         nuget-version: '5.8.x'
 
-    - name: Install Dependencies
-      # choco install of version 1.9.3 produced a checksum error
-      run: choco install doxygen.install --version=1.9.2
+#     - name: Install Dependencies
+#       # choco install of version 1.9.3 produced a checksum error
+#       run: choco install doxygen.install --version=1.9.2
 
-    - name: Uninstall Chocolatey
-      run: move "$env:PROGRAMDATA\chocolatey" "$env:PROGRAMDATA\_chocolatey"
+#     - name: Uninstall Chocolatey
+#       run: move "$env:PROGRAMDATA\chocolatey" "$env:PROGRAMDATA\_chocolatey"
 
-#    - name: Install Cap’n Proto
-#      run: |
-#        mkdir "${{ runner.workspace }}/capnp"
-#        cd "${{ runner.workspace }}/capnp"
-#        git clone https://github.com/sandstorm-io/capnproto.git
-#        cd capnproto
-#        git checkout release-0.9.0
-#        cd c++
-#        mkdir _build
-#        cd _build
-#        cmake .. -G "Visual Studio 16 2019" -A x64
-#        cmake --build . --parallel --config Release
-#        cmake --build . --target install --config Release
+# #    - name: Install Cap’n Proto
+# #      run: |
+# #        mkdir "${{ runner.workspace }}/capnp"
+# #        cd "${{ runner.workspace }}/capnp"
+# #        git clone https://github.com/sandstorm-io/capnproto.git
+# #        cd capnproto
+# #        git checkout release-0.9.0
+# #        cd c++
+# #        mkdir _build
+# #        cd _build
+# #        cmake .. -G "Visual Studio 16 2019" -A x64
+# #        cmake --build . --parallel --config Release
+# #        cmake --build . --target install --config Release
 
-    - name: Checkout
-      uses: actions/checkout@v3
-      with:
-        submodules:  'true'
-        fetch-depth: 0
+#     - name: Checkout
+#       uses: actions/checkout@v3
+#       with:
+#         submodules:  'true'
+#         fetch-depth: 0
 
-    - name: Download NPCAP
-      run: |
-        cd %GITHUB_WORKSPACE%
-        powershell -Command "& 'build_win\download_npcap.ps1'"
-      shell: cmd
+#     - name: Download NPCAP
+#       run: |
+#         cd %GITHUB_WORKSPACE%
+#         powershell -Command "& 'build_win\download_npcap.ps1'"
+#       shell: cmd
 
-    - name: Create Python virtualenv
-      run: |
-        mkdir "${{ runner.workspace }}\_build\complete\.venv\"
+#     - name: Create Python virtualenv
+#       run: |
+#         mkdir "${{ runner.workspace }}\_build\complete\.venv\"
 
-        # At the moment (2021-10-27) there is no official Python 3.10 lxml package available on pypi. Thus we use python 3.9.
-        py -3.9 -m venv "${{ runner.workspace }}\.venv"
-        CALL "${{ runner.workspace }}\.venv\Scripts\activate.bat"
+#         # At the moment (2021-10-27) there is no official Python 3.10 lxml package available on pypi. Thus we use python 3.9.
+#         py -3.9 -m venv "${{ runner.workspace }}\.venv"
+#         CALL "${{ runner.workspace }}\.venv\Scripts\activate.bat"
 
-        echo Upgrading pip
-        python -m pip install --upgrade pip
+#         echo Upgrading pip
+#         python -m pip install --upgrade pip
 
-        pip install wheel
+#         pip install wheel
 
-        echo Installing python requirements
-        pip install -r "%GITHUB_WORKSPACE%\requirements.txt"
+#         echo Installing python requirements
+#         pip install -r "%GITHUB_WORKSPACE%\requirements.txt"
 
-      shell: cmd
+#       shell: cmd
 
-    - name: CMake SDK
-      run: |
-        mkdir "${{ runner.workspace }}\_build\sdk\"
-        cd "${{ runner.workspace }}/_build/sdk"
+#     - name: CMake SDK
+#       run: |
+#         mkdir "${{ runner.workspace }}\_build\sdk\"
+#         cd "${{ runner.workspace }}/_build/sdk"
 
-        cmake %GITHUB_WORKSPACE% -G "Visual Studio 16 2019" -A x64 -T v140 ^
-        -DHAS_HDF5=ON ^
-        -DHAS_QT5=ON ^
-        -DHAS_CURL=OFF ^
-        -DHAS_CAPNPROTO=OFF ^
-        -DHAS_FTXUI=ON ^
-        -DBUILD_DOCS=OFF ^
-        -DBUILD_APPS=OFF ^
-        -DBUILD_SAMPLES=OFF ^
-        -DBUILD_TIME=ON ^
-        -DBUILD_PY_BINDING=OFF ^
-        -DBUILD_CSHARP_BINDING=OFF ^
-        -DBUILD_ECAL_TESTS=OFF ^
-        -DECAL_LAYER_ICEORYX=OFF ^
-        -DECAL_INCLUDE_PY_SAMPLES=OFF ^
-        -DECAL_INSTALL_SAMPLE_SOURCES=OFF ^
-        -DECAL_JOIN_MULTICAST_TWICE=OFF ^
-        -DECAL_NPCAP_SUPPORT=ON ^
-        -DECAL_THIRDPARTY_BUILD_CMAKE_FUNCTIONS=ON ^
-        -DECAL_THIRDPARTY_BUILD_PROTOBUF=ON ^
-        -DECAL_THIRDPARTY_BUILD_SPDLOG=ON ^
-        -DECAL_THIRDPARTY_BUILD_TINYXML2=ON ^
-        -DECAL_THIRDPARTY_BUILD_FINEFTP=OFF ^
-        -DECAL_THIRDPARTY_BUILD_CURL=OFF ^
-        -DECAL_THIRDPARTY_BUILD_GTEST=OFF ^
-        -DECAL_THIRDPARTY_BUILD_HDF5=ON ^
-        -DECAL_THIRDPARTY_BUILD_RECYCLE=ON ^
-        -DECAL_THIRDPARTY_BUILD_TCP_PUBSUB=ON ^
-        -DECAL_THIRDPARTY_BUILD_QWT=OFF ^
-        -DECAL_THIRDPARTY_BUILD_YAML-CPP=OFF ^
-        -DECAL_THIRDPARTY_BUILD_UDPCAP=ON ^
-        -DBUILD_SHARED_LIBS=OFF ^
-        -DCMAKE_PREFIX_PATH="%ProgramFiles%/Cap'n Proto/lib/cmake/CapnProto" ^
-        -DCMAKE_BUILD_TYPE=Debug ^
-        -DCPACK_PACK_WITH_INNOSETUP=OFF
-      shell: cmd
+#         cmake %GITHUB_WORKSPACE% -G "Visual Studio 16 2019" -A x64 -T v140 ^
+#         -DHAS_HDF5=ON ^
+#         -DHAS_QT5=ON ^
+#         -DHAS_CURL=OFF ^
+#         -DHAS_CAPNPROTO=OFF ^
+#         -DHAS_FTXUI=ON ^
+#         -DBUILD_DOCS=OFF ^
+#         -DBUILD_APPS=OFF ^
+#         -DBUILD_SAMPLES=OFF ^
+#         -DBUILD_TIME=ON ^
+#         -DBUILD_PY_BINDING=OFF ^
+#         -DBUILD_CSHARP_BINDING=OFF ^
+#         -DBUILD_ECAL_TESTS=OFF ^
+#         -DECAL_LAYER_ICEORYX=OFF ^
+#         -DECAL_INCLUDE_PY_SAMPLES=OFF ^
+#         -DECAL_INSTALL_SAMPLE_SOURCES=OFF ^
+#         -DECAL_JOIN_MULTICAST_TWICE=OFF ^
+#         -DECAL_NPCAP_SUPPORT=ON ^
+#         -DECAL_THIRDPARTY_BUILD_CMAKE_FUNCTIONS=ON ^
+#         -DECAL_THIRDPARTY_BUILD_PROTOBUF=ON ^
+#         -DECAL_THIRDPARTY_BUILD_SPDLOG=ON ^
+#         -DECAL_THIRDPARTY_BUILD_TINYXML2=ON ^
+#         -DECAL_THIRDPARTY_BUILD_FINEFTP=OFF ^
+#         -DECAL_THIRDPARTY_BUILD_CURL=OFF ^
+#         -DECAL_THIRDPARTY_BUILD_GTEST=OFF ^
+#         -DECAL_THIRDPARTY_BUILD_HDF5=ON ^
+#         -DECAL_THIRDPARTY_BUILD_RECYCLE=ON ^
+#         -DECAL_THIRDPARTY_BUILD_TCP_PUBSUB=ON ^
+#         -DECAL_THIRDPARTY_BUILD_QWT=OFF ^
+#         -DECAL_THIRDPARTY_BUILD_YAML-CPP=OFF ^
+#         -DECAL_THIRDPARTY_BUILD_UDPCAP=ON ^
+#         -DBUILD_SHARED_LIBS=OFF ^
+#         -DCMAKE_PREFIX_PATH="%ProgramFiles%/Cap'n Proto/lib/cmake/CapnProto" ^
+#         -DCMAKE_BUILD_TYPE=Debug ^
+#         -DCPACK_PACK_WITH_INNOSETUP=OFF
+#       shell: cmd
 
-    - name: CMake Complete
-      run: |
-        CALL "${{ runner.workspace }}\.venv\Scripts\activate.bat"
-        cd "${{ runner.workspace }}/_build/complete"
-        cmake %GITHUB_WORKSPACE% -G "Visual Studio 16 2019" -A x64 -T v140 ^
-        -DHAS_HDF5=ON ^
-        -DHAS_QT5=ON ^
-        -DHAS_CURL=ON ^
-        -DHAS_CAPNPROTO=OFF ^
-        -DHAS_FTXUI=ON ^
-        -DBUILD_DOCS=ON ^
-        -DBUILD_APPS=ON ^
-        -DBUILD_SAMPLES=ON ^
-        -DBUILD_TIME=ON ^
-        -DBUILD_PY_BINDING=ON ^
-        -DBUILD_CSHARP_BINDING=ON ^
-        -DBUILD_ECAL_TESTS=ON ^
-        -DECAL_LAYER_ICEORYX=OFF ^
-        -DECAL_INCLUDE_PY_SAMPLES=OFF ^
-        -DECAL_INSTALL_SAMPLE_SOURCES=ON ^
-        -DECAL_JOIN_MULTICAST_TWICE=OFF ^
-        -DECAL_NPCAP_SUPPORT=ON ^
-        -DECAL_THIRDPARTY_BUILD_CMAKE_FUNCTIONS=ON ^
-        -DECAL_THIRDPARTY_BUILD_PROTOBUF=ON ^
-        -DECAL_THIRDPARTY_BUILD_SPDLOG=ON ^
-        -DECAL_THIRDPARTY_BUILD_TINYXML2=ON ^
-        -DECAL_THIRDPARTY_BUILD_FINEFTP=ON ^
-        -DECAL_THIRDPARTY_BUILD_CURL=ON ^
-        -DECAL_THIRDPARTY_BUILD_GTEST=ON ^
-        -DECAL_THIRDPARTY_BUILD_HDF5=ON ^
-        -DECAL_THIRDPARTY_BUILD_RECYCLE=ON ^
-        -DECAL_THIRDPARTY_BUILD_TCP_PUBSUB=ON ^
-        -DECAL_THIRDPARTY_BUILD_QWT=ON ^
-        -DECAL_THIRDPARTY_BUILD_YAML-CPP=ON ^
-        -DECAL_THIRDPARTY_BUILD_UDPCAP=ON ^
-        -DBUILD_SHARED_LIBS=OFF ^
-        -DCMAKE_PREFIX_PATH="%ProgramFiles%/Cap'n Proto/lib/cmake/CapnProto" ^
-        -DCMAKE_BUILD_TYPE=Release ^
-        -DCPACK_PACK_WITH_INNOSETUP=ON
-        mkdir "%ALLUSERSPROFILE%\eCAL"
-        copy "%GITHUB_WORKSPACE%\ecal\core\cfg\ecal.ini" "%ALLUSERSPROFILE%\eCAL"
-      shell: cmd
+#     - name: CMake Complete
+#       run: |
+#         CALL "${{ runner.workspace }}\.venv\Scripts\activate.bat"
+#         cd "${{ runner.workspace }}/_build/complete"
+#         cmake %GITHUB_WORKSPACE% -G "Visual Studio 16 2019" -A x64 -T v140 ^
+#         -DHAS_HDF5=ON ^
+#         -DHAS_QT5=ON ^
+#         -DHAS_CURL=ON ^
+#         -DHAS_CAPNPROTO=OFF ^
+#         -DHAS_FTXUI=ON ^
+#         -DBUILD_DOCS=ON ^
+#         -DBUILD_APPS=ON ^
+#         -DBUILD_SAMPLES=ON ^
+#         -DBUILD_TIME=ON ^
+#         -DBUILD_PY_BINDING=ON ^
+#         -DBUILD_CSHARP_BINDING=ON ^
+#         -DBUILD_ECAL_TESTS=ON ^
+#         -DECAL_LAYER_ICEORYX=OFF ^
+#         -DECAL_INCLUDE_PY_SAMPLES=OFF ^
+#         -DECAL_INSTALL_SAMPLE_SOURCES=ON ^
+#         -DECAL_JOIN_MULTICAST_TWICE=OFF ^
+#         -DECAL_NPCAP_SUPPORT=ON ^
+#         -DECAL_THIRDPARTY_BUILD_CMAKE_FUNCTIONS=ON ^
+#         -DECAL_THIRDPARTY_BUILD_PROTOBUF=ON ^
+#         -DECAL_THIRDPARTY_BUILD_SPDLOG=ON ^
+#         -DECAL_THIRDPARTY_BUILD_TINYXML2=ON ^
+#         -DECAL_THIRDPARTY_BUILD_FINEFTP=ON ^
+#         -DECAL_THIRDPARTY_BUILD_CURL=ON ^
+#         -DECAL_THIRDPARTY_BUILD_GTEST=ON ^
+#         -DECAL_THIRDPARTY_BUILD_HDF5=ON ^
+#         -DECAL_THIRDPARTY_BUILD_RECYCLE=ON ^
+#         -DECAL_THIRDPARTY_BUILD_TCP_PUBSUB=ON ^
+#         -DECAL_THIRDPARTY_BUILD_QWT=ON ^
+#         -DECAL_THIRDPARTY_BUILD_YAML-CPP=ON ^
+#         -DECAL_THIRDPARTY_BUILD_UDPCAP=ON ^
+#         -DBUILD_SHARED_LIBS=OFF ^
+#         -DCMAKE_PREFIX_PATH="%ProgramFiles%/Cap'n Proto/lib/cmake/CapnProto" ^
+#         -DCMAKE_BUILD_TYPE=Release ^
+#         -DCPACK_PACK_WITH_INNOSETUP=ON
+#         mkdir "%ALLUSERSPROFILE%\eCAL"
+#         copy "%GITHUB_WORKSPACE%\ecal\core\cfg\ecal.ini" "%ALLUSERSPROFILE%\eCAL"
+#       shell: cmd
 
-    - name: Build SDK
-      run: cmake --build . --config Debug
-      working-directory: ${{ runner.workspace }}/_build/sdk
+#     - name: Build SDK
+#       run: cmake --build . --config Debug
+#       working-directory: ${{ runner.workspace }}/_build/sdk
 
-    - name: Build Release
-      run: cmake --build . --config Release
-      working-directory: ${{ runner.workspace }}/_build/complete
+#     - name: Build Release
+#       run: cmake --build . --config Release
+#       working-directory: ${{ runner.workspace }}/_build/complete
 
-    # Create Python.
-    # The strang-looking double-cmake is an ugly workaround to force CMake to
-    # re-find Python, after we have changed the venv from the outside. The
-    # alternative would be to clean everything, which would cause an unnecessary
-    # rebuild of eCAL and HDF5 for each python Version.
-    - name: Build Python 3.11 Wheel
-      run: |
-        mkdir ".venv_311"
-        py -3.11 -m venv ".venv_311"
-        CALL ".venv_311\Scripts\activate.bat"
-        pip install wheel
-        cmake %GITHUB_WORKSPACE% -G "Visual Studio 16 2019" -A x64 -T v140 -DPython_FIND_VIRTUALENV=FIRST
-        cmake %GITHUB_WORKSPACE% -G "Visual Studio 16 2019" -A x64 -T v140 -DPython_FIND_VIRTUALENV=ONLY
-        cmake --build . --target create_python_wheel --config Release
-      shell: cmd
-      working-directory: ${{ runner.workspace }}/_build/complete
+#     # Create Python.
+#     # The strang-looking double-cmake is an ugly workaround to force CMake to
+#     # re-find Python, after we have changed the venv from the outside. The
+#     # alternative would be to clean everything, which would cause an unnecessary
+#     # rebuild of eCAL and HDF5 for each python Version.
+#     - name: Build Python 3.11 Wheel
+#       run: |
+#         mkdir ".venv_311"
+#         py -3.11 -m venv ".venv_311"
+#         CALL ".venv_311\Scripts\activate.bat"
+#         pip install wheel
+#         cmake %GITHUB_WORKSPACE% -G "Visual Studio 16 2019" -A x64 -T v140 -DPython_FIND_VIRTUALENV=FIRST
+#         cmake %GITHUB_WORKSPACE% -G "Visual Studio 16 2019" -A x64 -T v140 -DPython_FIND_VIRTUALENV=ONLY
+#         cmake --build . --target create_python_wheel --config Release
+#       shell: cmd
+#       working-directory: ${{ runner.workspace }}/_build/complete
 
-    - name: Build Python 3.10 Wheel
-      run: |
-        mkdir ".venv_310"
-        py -3.10 -m venv ".venv_310"
-        CALL ".venv_310\Scripts\activate.bat"
-        pip install wheel
-        cmake %GITHUB_WORKSPACE% -G "Visual Studio 16 2019" -A x64 -T v140 -DPython_FIND_VIRTUALENV=FIRST
-        cmake %GITHUB_WORKSPACE% -G "Visual Studio 16 2019" -A x64 -T v140 -DPython_FIND_VIRTUALENV=ONLY
-        cmake --build . --target create_python_wheel --config Release
-      shell: cmd
-      working-directory: ${{ runner.workspace }}/_build/complete
+#     - name: Build Python 3.10 Wheel
+#       run: |
+#         mkdir ".venv_310"
+#         py -3.10 -m venv ".venv_310"
+#         CALL ".venv_310\Scripts\activate.bat"
+#         pip install wheel
+#         cmake %GITHUB_WORKSPACE% -G "Visual Studio 16 2019" -A x64 -T v140 -DPython_FIND_VIRTUALENV=FIRST
+#         cmake %GITHUB_WORKSPACE% -G "Visual Studio 16 2019" -A x64 -T v140 -DPython_FIND_VIRTUALENV=ONLY
+#         cmake --build . --target create_python_wheel --config Release
+#       shell: cmd
+#       working-directory: ${{ runner.workspace }}/_build/complete
 
-    - name: Build Python 3.9 Wheel
-      run: |
-        mkdir ".venv_39"
-        py -3.9 -m venv ".venv_39"
-        CALL ".venv_39\Scripts\activate.bat"
-        pip install wheel
-        cmake %GITHUB_WORKSPACE% -G "Visual Studio 16 2019" -A x64 -T v140 -DPython_FIND_VIRTUALENV=FIRST
-        cmake %GITHUB_WORKSPACE% -G "Visual Studio 16 2019" -A x64 -T v140 -DPython_FIND_VIRTUALENV=ONLY
-        cmake --build . --target create_python_wheel --config Release
-      shell: cmd
-      working-directory: ${{ runner.workspace }}/_build/complete
+#     - name: Build Python 3.9 Wheel
+#       run: |
+#         mkdir ".venv_39"
+#         py -3.9 -m venv ".venv_39"
+#         CALL ".venv_39\Scripts\activate.bat"
+#         pip install wheel
+#         cmake %GITHUB_WORKSPACE% -G "Visual Studio 16 2019" -A x64 -T v140 -DPython_FIND_VIRTUALENV=FIRST
+#         cmake %GITHUB_WORKSPACE% -G "Visual Studio 16 2019" -A x64 -T v140 -DPython_FIND_VIRTUALENV=ONLY
+#         cmake --build . --target create_python_wheel --config Release
+#       shell: cmd
+#       working-directory: ${{ runner.workspace }}/_build/complete
 
-    - name: Build Python 3.8 Wheel
-      run: |
-        mkdir ".venv_38"
-        py -3.8 -m venv ".venv_38"
-        CALL ".venv_38\Scripts\activate.bat"
-        pip install wheel
-        cmake %GITHUB_WORKSPACE% -G "Visual Studio 16 2019" -A x64 -T v140 -DPython_FIND_VIRTUALENV=FIRST
-        cmake %GITHUB_WORKSPACE% -G "Visual Studio 16 2019" -A x64 -T v140 -DPython_FIND_VIRTUALENV=ONLY
-        cmake --build . --target create_python_wheel --config Release
-      shell: cmd
-      working-directory: ${{ runner.workspace }}/_build/complete
+#     - name: Build Python 3.8 Wheel
+#       run: |
+#         mkdir ".venv_38"
+#         py -3.8 -m venv ".venv_38"
+#         CALL ".venv_38\Scripts\activate.bat"
+#         pip install wheel
+#         cmake %GITHUB_WORKSPACE% -G "Visual Studio 16 2019" -A x64 -T v140 -DPython_FIND_VIRTUALENV=FIRST
+#         cmake %GITHUB_WORKSPACE% -G "Visual Studio 16 2019" -A x64 -T v140 -DPython_FIND_VIRTUALENV=ONLY
+#         cmake --build . --target create_python_wheel --config Release
+#       shell: cmd
+#       working-directory: ${{ runner.workspace }}/_build/complete
 
-    - name: Build Python 3.7 Wheel
-      run: |
-        mkdir ".venv_37"
-        py -3.7 -m venv ".venv_37"
-        CALL ".venv_37\Scripts\activate.bat"
-        pip install wheel
-        cmake %GITHUB_WORKSPACE% -G "Visual Studio 16 2019" -A x64 -T v140 -DPython_FIND_VIRTUALENV=FIRST
-        cmake %GITHUB_WORKSPACE% -G "Visual Studio 16 2019" -A x64 -T v140 -DPython_FIND_VIRTUALENV=ONLY
-        cmake --build . --target create_python_wheel --config Release
-      shell: cmd
-      working-directory: ${{ runner.workspace }}/_build/complete
+#     - name: Build Python 3.7 Wheel
+#       run: |
+#         mkdir ".venv_37"
+#         py -3.7 -m venv ".venv_37"
+#         CALL ".venv_37\Scripts\activate.bat"
+#         pip install wheel
+#         cmake %GITHUB_WORKSPACE% -G "Visual Studio 16 2019" -A x64 -T v140 -DPython_FIND_VIRTUALENV=FIRST
+#         cmake %GITHUB_WORKSPACE% -G "Visual Studio 16 2019" -A x64 -T v140 -DPython_FIND_VIRTUALENV=ONLY
+#         cmake --build . --target create_python_wheel --config Release
+#       shell: cmd
+#       working-directory: ${{ runner.workspace }}/_build/complete
 
-    - name: Build Python 3.6 Wheel
-      run: |
-        mkdir ".venv_36"
-        py -3.6 -m venv ".venv_36"
-        CALL ".venv_36\Scripts\activate.bat"
-        pip install wheel
-        cmake %GITHUB_WORKSPACE% -G "Visual Studio 16 2019" -A x64 -T v140 -DPython_FIND_VIRTUALENV=FIRST
-        cmake %GITHUB_WORKSPACE% -G "Visual Studio 16 2019" -A x64 -T v140 -DPython_FIND_VIRTUALENV=ONLY
-        cmake --build . --target create_python_wheel --config Release
-      shell: cmd
-      working-directory: ${{ runner.workspace }}/_build/complete
+#     - name: Build Python 3.6 Wheel
+#       run: |
+#         mkdir ".venv_36"
+#         py -3.6 -m venv ".venv_36"
+#         CALL ".venv_36\Scripts\activate.bat"
+#         pip install wheel
+#         cmake %GITHUB_WORKSPACE% -G "Visual Studio 16 2019" -A x64 -T v140 -DPython_FIND_VIRTUALENV=FIRST
+#         cmake %GITHUB_WORKSPACE% -G "Visual Studio 16 2019" -A x64 -T v140 -DPython_FIND_VIRTUALENV=ONLY
+#         cmake --build . --target create_python_wheel --config Release
+#       shell: cmd
+#       working-directory: ${{ runner.workspace }}/_build/complete
 
-#    - name: Build Documentation C
-#      run: cmake --build . --target documentation_c
-#      working-directory: ${{ runner.workspace }}/_build
-#
-#    - name: Build Documentation C++
-#      run: cmake --build . --target documentation_cpp
-#      working-directory: ${{ runner.workspace }}/_build
+# #    - name: Build Documentation C
+# #      run: cmake --build . --target documentation_c
+# #      working-directory: ${{ runner.workspace }}/_build
+# #
+# #    - name: Build Documentation C++
+# #      run: cmake --build . --target documentation_cpp
+# #      working-directory: ${{ runner.workspace }}/_build
 
-    - name: Run Tests
-      run: ctest -C Release -V
-      working-directory: ${{ runner.workspace }}/_build/complete
+#     - name: Run Tests
+#       run: ctest -C Release -V
+#       working-directory: ${{ runner.workspace }}/_build/complete
 
-    - name: Pack SDK
-      run: cpack -C Debug
-      working-directory: ${{ runner.workspace }}/_build/sdk
+#     - name: Pack SDK
+#       run: cpack -C Debug
+#       working-directory: ${{ runner.workspace }}/_build/sdk
 
-    - name: Pack complete setup
-      run: cpack -C Release
-      working-directory: ${{ runner.workspace }}/_build/complete
+#     - name: Pack complete setup
+#       run: cpack -C Release
+#       working-directory: ${{ runner.workspace }}/_build/complete
 
-    - name: Detect certificate
-      id: cert
-      if: env.IS_GITHUB_SIGNING_ALLOWED == 'true'
-      run: |
-        if [[ -n "${CERT_BODY}" \
-           && -n "${CERT_PSWD}" \
-           && -n "${CERT_ALGO}" \
-           && -n "${CERT_HASH}" ]]
-        then
-          echo "ATTENTION: a certificate is available"
-          echo "IS_GITHUB_SIGNING_ENABLED=true" >> $GITHUB_ENV
-        else
-          echo "WARNING: a certificate is not available"
-        fi
-        cd _build/complete/_deploy
-        ASSET_NAME=$(ls *.exe)
-        echo "ASSET_NAME=${ASSET_NAME}" >> $GITHUB_ENV       
-      shell: bash
-      env:
-        CERT_BODY: ${{ secrets.CERT_BODY }}
-        CERT_PSWD: ${{ secrets.CERT_PSWD }}
-        CERT_ALGO: ${{ secrets.CERT_ALGO }}
-        CERT_HASH: ${{ secrets.CERT_HASH }}
+#     - name: Detect certificate
+#       id: cert
+#       if: env.IS_GITHUB_SIGNING_ALLOWED == 'true'
+#       run: |
+#         if ($CERT_BODY -and $CERT_PSWD -and $CERT_ALGO -and $CERT_HASH) {
+#           Write-Output "ATTENTION: a certificate is available"
+#           Write-Output "IS_GITHUB_SIGNING_ENABLED=true" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+#         } else {
+#           Write-Output "WARNING: a certificate is not available"
+#         }
+#         $LS_OUT = ls *.exe
+#         Write-Output "ASSET_NAME=$($LS_OUT.Name)" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+#       env:
+#         CERT_BODY: ${{ secrets.CERT_BODY }}
+#         CERT_PSWD: ${{ secrets.CERT_PSWD }}
+#         CERT_ALGO: ${{ secrets.CERT_ALGO }}
+#         CERT_HASH: ${{ secrets.CERT_HASH }}
+#       working-directory: ${{ runner.workspace }}/_build/complete/_deploy
 
-    # https://github.com/OrhanKupusoglu/code-sign-action
-    - name: Sign the installer
-      if: env.IS_GITHUB_SIGNING_ENABLED == 'true'
-      uses: OrhanKupusoglu/code-sign-action@v5.5.1
-      with:
-        cert_body: ${{ secrets.CERT_BODY }}
-        cert_pswd: ${{ secrets.CERT_PSWD }}
-        cert_algo: ${{ secrets.CERT_ALGO }}
-        cert_hash: ${{ secrets.CERT_HASH }}
-        folder: _build/complete/_deploy
-        debug: false
+#     # https://github.com/OrhanKupusoglu/code-sign-action
+#     - name: Sign the installer
+#       if: env.IS_GITHUB_SIGNING_ENABLED == 'true'
+#       uses: OrhanKupusoglu/code-sign-action@v5.5.1
+#       with:
+#         cert_body: ${{ secrets.CERT_BODY }}
+#         cert_pswd: ${{ secrets.CERT_PSWD }}
+#         cert_algo: ${{ secrets.CERT_ALGO }}
+#         cert_hash: ${{ secrets.CERT_HASH }}
+#         folder: ${{ runner.workspace }}/_build/complete/_deploy
+#         debug: false
 
-    - name: Upload Windows setup
-      uses: actions/upload-artifact@v3.1.2
-      with:
-        name: windows-setup
-        path: _build/complete/_deploy/*.exe
+#     - name: Upload Windows setup
+#       uses: actions/upload-artifact@v3.1.2
+#       with:
+#         name: windows-setup
+#         path: ${{ runner.workspace }}/_build/complete/_deploy/*.exe
 
-    - name: Upload Python Wheels
-      uses: actions/upload-artifact@v3.1.2
-      with:
-        name: windows-python-wheels
-        path: _build/complete/_deploy/*.whl
+#     - name: Upload Python Wheels
+#       uses: actions/upload-artifact@v3.1.2
+#       with:
+#         name: windows-python-wheels
+#         path: ${{ runner.workspace }}/_build/complete/_deploy/*.whl
 
     # --------------------------------------------------------------------------------------------------
+
+    - name: Create binaries
+      run: |
+        mkdir -p _build/complete/_deploy && cd $_
+        echo "temporary test binary" > "ecal-5.11.0-win64.exe" 
+        echo "temporary test binary" > "ecal-5.11.0-win64.whl" 
+        pwd
+        ls -l
+      shell: bash
 
     - name: Set var names for the temporary release
       if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && env.JENKINS_TOKEN != ''
       run: |
-        DATE_TIME=$(date +"%Y-%m-%dT%T.%3N")
-        TAG_SUFFIX=${DATE_TIME//:/_}
-        TAG_SUFFIX=${TAG_SUFFIX//-/_}
-        echo "TEMP_RELEASE_NAME=Temporary_Release_${DATE_TIME}" >> $GITHUB_ENV
-        echo "TEMP_RELEASE_TAG=temp_rel_${TAG_SUFFIX}" >> $GITHUB_ENV
-        echo "IS_JENKINS_SIGNING_ENABLED=true" >> $GITHUB_ENV
-      shell: bash
+        $DATE_TIME = Get-Date -Format "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff"
+        $TAG_SUFFIX = $DATE_TIME -replace '-','_' -replace ':','_'
+        Write-Output "TEMP_RELEASE_NAME=Temporary_Release_$DATE_TIME" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+        Write-Output "TEMP_RELEASE_TAG=temp_rel_$TAG_SUFFIX" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+        Write-Output "IS_JENKINS_SIGNING_ENABLED=true" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
       env:
         JENKINS_TOKEN: ${{ secrets.JENKINS_TOKEN_GH_RELEASE }}
  
@@ -351,183 +353,149 @@ jobs:
     - name: Collect data about the temporary release
       if: env.IS_JENKINS_SIGNING_ENABLED == 'true'
       run: |
-        TEMP_RELEASE_URL="${{ steps.temp_rel.outputs.url }}"
-        TEMP_RELEASE_ID="${{ steps.temp_rel.outputs.id }}"
-        TEMP_RELEASE_UPLOAD_URL="${{ steps.temp_rel.outputs.upload_url }}"
-        TEMP_RELEASE_ASSETS="${{ steps.temp_rel.outputs.assets }}"
-        TEMP_ASSET_DOWNLOAD_URL="${{ fromJSON(steps.temp_rel.outputs.assets)[0].browser_download_url }}"
-        #ASSET_NAME=$(basename "${TEMP_ASSET_DOWNLOAD_URL}")
+        TEMP_RELEASE_URL = "${{ steps.temp_rel.outputs.url }}"
+        TEMP_RELEASE_ID = "${{ steps.temp_rel.outputs.id }}"
+        TEMP_RELEASE_UPLOAD_URL = "${{ steps.temp_rel.outputs.upload_url }}"
+        TEMP_RELEASE_ASSETS = "${{ steps.temp_rel.outputs.assets }}"
+        TEMP_ASSET_DOWNLOAD_URL = "${{ fromJSON(steps.temp_rel.outputs.assets)[0].browser_download_url }}"
 
-        echo "TEMP_RELEASE_ID=${TEMP_RELEASE_ID}" >> $GITHUB_ENV
-        echo "TEMP_ASSET_DOWNLOAD_URL=${TEMP_ASSET_DOWNLOAD_URL}" >> $GITHUB_ENV
-        #echo "ASSET_NAME=${ASSET_NAME}" >> $GITHUB_ENV
+        Write-Output "TEMP_RELEASE_ID=$TEMP_RELEASE_ID" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+        Write-Output "TEMP_ASSET_DOWNLOAD_URL=$TEMP_ASSET_DOWNLOAD_URL" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
 
-        echo "-- Repository         : ${GITHUB_REPOSITORY}"
-        echo "-- Branch             : ${GITHUB_REF}"
-        echo "-- HEAD               : ${GITHUB_SHA}"
-        echo "-- Release ID         : ${TEMP_RELEASE_ID}"
-        echo "-- Release name       : ${TEMP_RELEASE_NAME}"
-        echo "-- Release tag        : ${TEMP_RELEASE_TAG}"
-        echo "-- Release URL        : ${TEMP_RELEASE_URL}"
-        echo "-- Release upload URL : ${TEMP_RELEASE_UPLOAD_URL}"
-        echo "-- Release assets     : ${TEMP_RELEASE_ASSETS}"
-        echo "-- Asset name         : ${ASSET_NAME}"
-        echo "-- Asset download URL : ${TEMP_ASSET_DOWNLOAD_URL}"
-      shell: bash
+        Write-Output "-- Repository         : $GITHUB_REPOSITORY"
+        Write-Output "-- Branch             : $GITHUB_REF"
+        Write-Output "-- HEAD               : $GITHUB_SHA" 
+        Write-Output "-- Release ID         : $TEMP_RELEASE_ID"
+        Write-Output "-- Release name       : $TEMP_RELEASE_NAME"
+        Write-Output "-- Release tag        : $TEMP_RELEASE_TAG"
+        Write-Output "-- Release URL        : $TEMP_RELEASE_URL"
+        Write-Output "-- Release upload URL : $TEMP_RELEASE_UPLOAD_URL"
+        Write-Output "-- Release assets     : $TEMP_RELEASE_ASSETS"
+        Write-Output "-- Asset name         : $ASSET_NAME"
+        Write-Output "-- Asset download URL : $TEMP_ASSET_DOWNLOAD_URL"
 
     - name: Sign the installer on Eclipse CI
       if: env.IS_JENKINS_SIGNING_ENABLED == 'true'
       run: |
-        export LC_CTYPE=en_US.utf8
+        $ASSET_NAME_OLD = "$ASSET_NAME.old"
+        $JENKINS_JOB = 'gh_auto_release'
+        $TOKEN = "$JENKINS_TOKEN"
+        $RELEASE_ID = "$TEMP_RELEASE_ID"
+        $ENCODED_BYTES = [System.Text.Encoding]::UTF8.GetBytes($TEMP_ASSET_DOWNLOAD_URL)
+        $ASSET_URL = [System.Convert]::ToBase64String($ENCODED_BYTES)
+        $JENKINS_BASE_URL = "https://ci.eclipse.org/ecal/job/$JENKINS_JOB"
+        $JENKINS_TRIGGER_URL = "$JENKINS_BASE_URL/buildWithParameters?token=$TOKEN&GH_RELEASE_ID=$RELEASE_ID&GH_ASSET_URL=$ASSET_URL"
+        $WAIT_FOR_JENKINS_SEC = 5
+        $STATUS_JSON = status.json
+        $NEW_BUILD = 0
+        $COUNTER_LIMIT = 20
+        $RESPONSE_CODE = 0
+        $QUEUE_URL = ''
+        $KEY_NUMBER = 'number'
+        $KEY_BUILDING = 'building'
+        $KEY_RESULT = 'result'
+        $COUNTER = 0
 
-        ASSET_NAME_OLD="${ASSET_NAME}.old"
-        JENKINS_JOB='gh_auto_release'
-        TOKEN="${JENKINS_TOKEN}"
-        RELEASE_ID="${TEMP_RELEASE_ID}"
-        ASSET_URL=$(echo "${TEMP_ASSET_DOWNLOAD_URL}" | base64 --wrap 0)
-        JENKINS_BASE_URL="https://ci.eclipse.org/ecal/job/${JENKINS_JOB}"
-        JENKINS_TRIGGER_URL="${JENKINS_BASE_URL}/buildWithParameters?token=${TOKEN}&GH_RELEASE_ID=${RELEASE_ID}&GH_ASSET_URL=${ASSET_URL}"
-        JENKINS_STATUS_URL="${JENKINS_BASE_URL}/lastBuild/api/json"
-        WAIT_FOR_JENKINS_SEC=5
-        STATUS_JSON=status.json
-        NEW_BUILD=0
-        COUNTER_LIMIT=20
-        RESPONSE_CODE=0
-        QUEUE_URL=''
-        REGEX_NUMBER=',"number":\s*(.*),'
-        COUNTER=0
+        Rename-Item -Path "$ASSET_NAME" -NewName "$ASSET_NAME_OLD" 
 
-        cd _build/complete/_deploy
-        mv "${ASSET_NAME}" "${ASSET_NAME_OLD}"
+        Write-Output "-- trigger a new build with`r`n   release id     : $RELEASE_ID`r`n   download asset : $TEMP_ASSET_DOWNLOAD_URL`r`n   BASE64         : $ASSET_URL"
 
-        printf -- "-- trigger a new build with\n   release id     : %d\n   download asset : %s\n   BASE64         : %s\n" \
-          ${RELEASE_ID} "${TEMP_ASSET_DOWNLOAD_URL}" "${ASSET_URL}" 
+        $RESPONSE = Invoke-WebRequest -Method HEAD -Uri $JENKINS_TRIGGER_URL -UseBasicParsing
+        $RES_CODE = $RESPONSE.StatusCode
+        Write-Output "    ++ trigger build - HTTP status code: $RES_CODE"
+        $QUEUE_URL = ''
 
-        mapfile -t RESPONSE_HEADERS < <(curl -i -s -S -L "${JENKINS_TRIGGER_URL}")
-        for HEADER in "${RESPONSE_HEADERS[@]}"
-        do
-          # first line
-          if [[ "${HEADER}" =~ HTTP* ]] 
-          then
-            HTTP=(${HEADER})
-            RESPONSE_CODE=${HTTP[1]}
-          elif [[ "${HEADER}" =~ location* ]] 
-          then
-            LOCATION=(${HEADER})
-            QUEUE_URL=${LOCATION[1]}
-            # delete the hidden \r
-            QUEUE_URL=$(echo "${QUEUE_URL}" | tr -d '\r')
-            API_SUFFIX='api/json/'
-            QUEUE_URL="${QUEUE_URL}${API_SUFFIX}"
-            break
-          fi
-        done
-        if [[ ${RESPONSE_CODE} -ge 200 && ${RESPONSE_CODE} -lt 300 ]]
-        then
-          printf -- "    ++ queue URL: %s\n" "${QUEUE_URL}"
-        else
-          printf -- "    ** trigger failure\n"
-          exit 1
-        fi
+        if ($RES_CODE -ge 200 -and $RES_CODE -lt 300) {
+          $QUEUE_URL = $RESPONSE.Headers.location
+          Write-Output "    ++ queue URL: $QUEUE_URL"
+        } else {
+          Write-Output "    ** trigger failure"
+          Exit 1
+        }
 
-        printf -- "-- get the new build number\n"
-        while true
-        do
-            ((COUNTER=COUNTER+1))
-            if [[ $COUNTER -gt $COUNTER_LIMIT ]]
-            then
-                printf -- "    ** determination of the new build number failed after %d tries\n" $COUNTER_LIMIT
-                exit 1
-            fi
+        Write-Output "-- get the new build number"
+        $NEW_BUILD = 0
 
-            FOUND=false
-            mapfile -t RESPONSE_DATA < <(curl -i -s -S -H "Accept: application/json" "${QUEUE_URL}")
-            for LINE in "${RESPONSE_DATA[@]}"
-            do
-                # first line
-                if [[ "${LINE}" =~ HTTP* ]] 
-                then
-                    HTTP=(${LINE})
-                    RESPONSE_CODE=${HTTP[1]}
-                elif [[ "${LINE}" =~ ${REGEX_NUMBER} ]] 
-                then
-                    NEW_BUILD=$(echo "${LINE}" | grep -Po ${REGEX_NUMBER} | grep -Eo [0-9]*)
-                    FOUND=true
-                    break
-                fi
-            done
-            printf -- "    ++ build number retrieval - HTTP status code: %s\n" "${RESPONSE_CODE}"
-            if [[ ${RESPONSE_CODE} -ge 200 && ${RESPONSE_CODE} -lt 300 ]]
-            then
-                if $FOUND
-                then
-                    printf -- "    ++ #build number: %d\n" ${NEW_BUILD}
-                    break
-                else
-                    printf -- "    ++ ... pending, wait for ${WAIT_FOR_JENKINS_SEC}s\n"
-                    sleep ${WAIT_FOR_JENKINS_SEC}
-                fi
-            else
-              printf -- "    ** determination of the build number failed, trying again\n"
-              sleep ${WAIT_FOR_JENKINS_SEC}
-            fi
-        done
+        while ($true) {
+          $COUNTER++
 
-        printf -- "-- check build status\n"
-        while true
-        do
-          RESPONSE_CODE=$(curl -s -S -w "%{response_code}" -o "${STATUS_JSON}" "${JENKINS_STATUS_URL}")
-          printf -- "    ++ status check - HTTP status code: %s\n" "${RESPONSE_CODE}" 
-          if [[ ${RESPONSE_CODE} -ge 200 && ${RESPONSE_CODE} -lt 300 ]]
-          then
-            true
-          else
-            printf -- "    ** status check failure\n"
-            exit 1
-          fi
+          if ($COUNTER -gt $COUNTER_LIMIT)) {
+              Write-Output "    ** determination of the new build number failed after $$COUNTER_LIMIT tries" 
+              Exit 1
+          }
+          
+          $RESPONSE = Invoke-WebRequest -Uri $QUEUE_URL
+          $RES_CODE = $RESPONSE.StatusCode
+          Write-Output "    ++ build number retrieval - HTTP status code: $RES_CODE"
 
-          NUMBER=$(grep -Po "(?<=\"number\":)(\w*)(?=,)" -- "${STATUS_JSON}")
-          if [[ ${NUMBER} -eq ${NEW_BUILD} ]]
-          then
-            BUILDING=$(grep -Po "(?<=\"building\":)(\w*)(?=,)" -- "${STATUS_JSON}")
-            if [[ "${BUILDING}" == 'true' ]]
-            then
-              printf -- "    ++ building ..., wait for ${WAIT_FOR_JENKINS_SEC}s\n"
-              sleep ${WAIT_FOR_JENKINS_SEC}
-            else
-                RESULT=$(grep -Po '(?<=\"result\":\")(\w*)(?=\",)' -- "${STATUS_JSON}")
-                if [[ "${RESULT}" == 'SUCCESS' ]]
-                then
-                  #ASSET_NAME=$(grep -Po '(?<=\"fileName\":\")([^"]*)(?=\",)' -- "${STATUS_JSON}")
-                  printf -- "    ++ build success, asset name: '%s'\n" "${ASSET_NAME}"
-                  break
-                else
-                  printf -- "    ** build failure\n"
-                  exit 1        
-                fi
-            fi
-          else
-            printf -- "    ++ ... pending, wait for ${WAIT_FOR_JENKINS_SEC}s\n"
-            sleep ${WAIT_FOR_JENKINS_SEC}
-          fi
-        done
+          if ($RES_CODE -ge 200 -and $RES_CODE -lt 300) {
+            $NEW_BUILD = ConvertFrom-Json $RESPONSE.Content  | Select-Object -expand $KEY_NUMBER
 
-        printf -- "-- download the newly-signed Windows installer\n"
+            if ($NEW_BUILD) {
+              Write-Output "    ++ #build number: $NEW_BUILD"
+              Break
+            } else {
+              Write-Output "    ++ ... pending, wait for $WAIT_FOR_JENKINS_SEC s"
+              Start-Sleep -s $WAIT_FOR_JENKINS_SEC
+            }
+          } else {
+            Write-Output "    ** determination of the build number failed, trying again after $WAIT_FOR_JENKINS_SEC s"
+            Start-Sleep -s $WAIT_FOR_JENKINS_SEC
+          }
+        }
+
+        Write-Output "-- check build status of #Build $NEW_BUILD"
+        $JENKINS_STATUS_URL = "$JENKINS_BASE_URL/$NEW_BUILD/api/json"
+
+        while ($true) {
+          $RESPONSE = Invoke-WebRequest -Uri $JENKINS_STATUS_URL
+          $RES_CODE = $RESPONSE.StatusCode
+          Write-Output "    ++ status check - HTTP status code: $RES_CODE"
+
+          if ($RES_CODE -ge 200 -and $RES_CODE -lt 300) {
+            $CONTENT = ConvertFrom-Json $RESPONSE.Content
+            $NUMBER = $CONTENT | Select-Object -expand $KEY_NUMBER
+            if ($NUMBER -eq $NEW_BUILD) {
+              $BUILDING = $CONTENT | Select-Object -expand $KEY_BUILDING
+              if ($BUILDING) {
+                Write-Output "    ++ building ..., wait for $WAIT_FOR_JENKINS_SEC s"
+                Start-Sleep -s $WAIT_FOR_JENKINS_SEC
+              } else {
+                $RESULT = $CONTENT | Select-Object -expand $KEY_RESULT
+                if ($RESULT == 'SUCCESS') {
+                  Write-Output "    ++ build success, asset name: '$ASSET_NAME'"
+                  Break
+                } else {
+                  Write-Output "    ** build failure"
+                  Exit 1        
+                }
+              }
+            } else {
+              Write-Output "    ++ ... pending, wait for $WAIT_FOR_JENKINS_SEC s"
+              Start-Sleep -s $WAIT_FOR_JENKINS_SEC
+            }
+          } else {
+            Write-Output "    ** status check failure"
+            Exit 1
+          }
+        }
+
+        Write-Output "-- download the newly-signed Windows installer from #Build $NEW_BUILD"
         JENKINS_DOWNLOAD_URL="${JENKINS_BASE_URL}/${NEW_BUILD}/artifact/${ASSET_NAME}"
-        RESPONSE_CODE=$(curl -s -S -O -w "%{response_code}" "${JENKINS_DOWNLOAD_URL}")
-        printf -- "    ++ download - HTTP status code: %s\n" "${RESPONSE_CODE}" 
-        if [[ ${RESPONSE_CODE} -ge 200 && ${RESPONSE_CODE} -lt 300 ]]
-        then
-          echo "IS_DOWNLOAD_AVAILABLE=true" >> $GITHUB_ENV
-          printf -- "    ++ downloaded signed installer: '${ASSET_NAME}'\n"
-        else
-          echo "IS_DOWNLOAD_AVAILABLE=false" >> $GITHUB_ENV
-          printf -- "    ** download failure\n"
-          exit 1
-        fi
-      shell: bash
+        $RESPONSE = Invoke-WebRequest -Uri $JENKINS_DOWNLOAD_URL -OutFile $ASSET_NAME
+        $RES_CODE = $RESPONSE.StatusCode
+        Write-Output "    ++ download installer - HTTP status code: $RESPONSE_CODE"
+
+        if ($RES_CODE -ge 200 -and $RES_CODE -lt 300) {
+          Write-Output "IS_DOWNLOAD_AVAILABLE=true" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+          Write-Output "    ++ downloaded signed installer: '$ASSET_NAME'"
+        } else {
+          Write-Output "    ** download failure"
+          Exit 1
+        }
       env:
         JENKINS_TOKEN: ${{ secrets.JENKINS_TOKEN_GH_RELEASE }}      
+      working-directory: ${{ runner.workspace }}/_build/complete/_deploy
 
     # https://github.com/dev-drprasad/delete-tag-and-release
     # last release v0.2.0 gives Node v12 warnings 
