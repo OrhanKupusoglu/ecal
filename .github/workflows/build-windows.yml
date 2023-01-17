@@ -464,7 +464,7 @@ jobs:
           $RESPONSE = Invoke-WebRequest -Uri $JENKINS_STATUS_URL
           $RES_CODE = $RESPONSE.StatusCode
           Write-Output "    ++ status check - HTTP status code: $RES_CODE"
-          ConvertFrom-Json $RESPONSE.Content
+
           if ($RES_CODE -ge 200 -and $RES_CODE -lt 300) {
             $CONTENT = ConvertFrom-Json $RESPONSE.Content
             $NUMBER = $CONTENT | Select-Object -expand $KEY_NUMBER
@@ -496,9 +496,15 @@ jobs:
         $JENKINS_DOWNLOAD_URL = "$JENKINS_BASE_URL/$BUILD_NUM/artifact/$Env:ASSET_NAME"
         Write-Output "-- download the newly-signed Windows installer from #Build $BUILD_NUM`r`n   $JENKINS_DOWNLOAD_URL"
 
-        $RESPONSE = Invoke-WebRequest -Uri $JENKINS_DOWNLOAD_URL -OutFile $Env:ASSET_NAME
-        $RES_CODE = $RESPONSE.StatusCode
-        Write-Output "    ++ download installer - HTTP status code: $RESPONSE_CODE"
+        try {
+          $RESPONSE = Invoke-WebRequest -Uri $JENKINS_DOWNLOAD_URL -OutFile $Env:ASSET_NAME
+          $RES_CODE = $RESPONSE.StatusCode
+          Write-Output "    ++ download installer - HTTP status code: $RESPONSE_CODE"
+        } catch [Microsoft.PowerShell.Commands.HttpResponseException] {
+          # Get the status code...
+          $RES_CODE = $_.Exception.Response.StatusCode
+          Write-Output "** RES_CODE = $RES_CODE"
+        } catch
 
         if ($RES_CODE -ge 200 -and $RES_CODE -lt 300) {
           Write-Output "IS_DOWNLOAD_AVAILABLE=true" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
