@@ -274,7 +274,7 @@ jobs:
     - name: Copy Windows installer to the root directory
       run: |
         Copy-Item -Path "*.exe" -Destination "$Env:ROOT_DIR/ecal"
-      #working-directory: ${{ runner.workspace }}/_build/complete/_deploy
+      working-directory: ${{ runner.workspace }}/_build/complete/_deploy
       env:
         ROOT_DIR: ${{ runner.workspace }}
 
