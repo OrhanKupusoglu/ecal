@@ -290,7 +290,7 @@ jobs:
       id: cert
       if: env.IS_GITHUB_SIGNING_ALLOWED == 'true'
       run: |
-        if ($CERT_BODY -and $CERT_PSWD -and $CERT_ALGO -and $CERT_HASH) {
+        if ($Env:CERT_BODY -and $Env:CERT_PSWD -and $Env:CERT_ALGO -and $Env:CERT_HASH) {
           Write-Output "ATTENTION: a certificate is available"
           Write-Output "IS_GITHUB_SIGNING_ENABLED=true" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
         } else {
