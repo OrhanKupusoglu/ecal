@@ -413,7 +413,8 @@ jobs:
         $QUEUE_URL = ''
 
         if ($RES_CODE -ge 200 -and $RES_CODE -lt 300) {
-          $QUEUE_URL = $RESPONSE.Headers.location[0]
+          $QUEUE_URL = "$RESPONSE.Headers.location"
+          $QUEUE_URL = "$QUEUE_URL/api/json/" 
           Write-Output "    ++ queue URL: $QUEUE_URL"
         } else {
           Write-Output "    ** trigger failure"
