@@ -33,18 +33,15 @@ jobs:
     runs-on: windows-2019
     steps:
 
-    # temporarily create a release so that remote CI server can download the just uploaded binary asset
-    # to be deleted in a later step by the API
-
     - name: Set var names for the temporary release
-      if: env.IS_JENKINS_SIGNING_ALLOWED == 'true'
+      if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && env.JENKINS_TOKEN != ''
       run: |
         DATE_TIME=$(date +"%Y-%m-%dT%T.%3N")
         TAG_SUFFIX=${DATE_TIME//:/_}
         TAG_SUFFIX=${TAG_SUFFIX//-/_}
         echo "TEMP_RELEASE_NAME=Temporary_Release_${DATE_TIME}" >> $GITHUB_ENV
         echo "TEMP_RELEASE_TAG=temp_rel_${TAG_SUFFIX}" >> $GITHUB_ENV
-        echo "JENKINS_TOKEN=${{ env.JENKINS_TOKEN }}" >> $GITHUB_ENV
+        echo "IS_JENKINS_SIGNING_ENABLED=true" >> $GITHUB_ENV
         echo "ARTIFACT_NAME=${{ env.ARTIFACT_NAME }}" >> $GITHUB_ENV
         echo "ASSET_NAME=${{ env.ASSET_NAME }}" >> $GITHUB_ENV
         echo "GITHUB_REPOSITORY=${{ env.GITHUB_REPOSITORY }}" >> $GITHUB_ENV
@@ -61,11 +58,11 @@ jobs:
       uses: actions/download-artifact@v3.0.2
       with:
         name: ${{ env.ARTIFACT_NAME }}
-        path: _build/complete/_deploy
-     
+        path: _build/complete/_deploy        
+    
     # https://github.com/softprops/action-gh-release
     - name: Create a temporary release
-      if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && env.JENKINS_TOKEN != ''
+      if: env.IS_JENKINS_SIGNING_ENABLED == 'true'
       id: temp_rel
       uses: softprops/action-gh-release@v0.1.15
       with:
@@ -73,38 +70,40 @@ jobs:
         prerelease: true
         generate_release_notes: false
         append_body: false
+        target_commitish: ${{ env.GITHUB_SHA }}
         name: ${{ env.TEMP_RELEASE_NAME }}
         tag_name: ${{ env.TEMP_RELEASE_TAG }}
         files: _build/complete/_deploy/${{ env.ASSET_NAME }}
 
     - name: Collect data about the temporary release
-      if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && env.JENKINS_TOKEN != ''
+      if: env.IS_JENKINS_SIGNING_ENABLED == 'true'
       run: |
         TEMP_RELEASE_URL="${{ steps.temp_rel.outputs.url }}"
         TEMP_RELEASE_ID="${{ steps.temp_rel.outputs.id }}"
         TEMP_RELEASE_UPLOAD_URL="${{ steps.temp_rel.outputs.upload_url }}"
         TEMP_RELEASE_ASSETS="${{ steps.temp_rel.outputs.assets }}"
         TEMP_ASSET_DOWNLOAD_URL="${{ fromJSON(steps.temp_rel.outputs.assets)[0].browser_download_url }}"
+        #ASSET_NAME=$(basename "${TEMP_ASSET_DOWNLOAD_URL}")
 
-        #echo "TEMP_RELEASE_URL=${TEMP_RELEASE_URL}" >> $GITHUB_ENV
         echo "TEMP_RELEASE_ID=${TEMP_RELEASE_ID}" >> $GITHUB_ENV
-        #echo "TEMP_RELEASE_UPLOAD_URL=${TEMP_RELEASE_UPLOAD_URL}" >> $GITHUB_ENV
-        #echo "TEMP_RELEASE_ASSETS=${TEMP_RELEASE_ASSETS}" >> $GITHUB_ENV
         echo "TEMP_ASSET_DOWNLOAD_URL=${TEMP_ASSET_DOWNLOAD_URL}" >> $GITHUB_ENV
+        #echo "ASSET_NAME=${ASSET_NAME}" >> $GITHUB_ENV
 
-        echo "-- Repository         : ${{ env.GITHUB_REPOSITORY }}"
+        echo "-- Repository         : ${{ inputs.github_repository }}"
+        echo "-- Branch             : ${GITHUB_REF}"
+        echo "-- HEAD               : ${GITHUB_SHA}"
         echo "-- Release ID         : ${TEMP_RELEASE_ID}"
-        echo "-- Release Name       : ${TEMP_RELEASE_NAME}"
-        echo "-- Release Tag        : ${TEMP_RELEASE_TAG}"
+        echo "-- Release name       : ${TEMP_RELEASE_NAME}"
+        echo "-- Release tag        : ${TEMP_RELEASE_TAG}"
         echo "-- Release URL        : ${TEMP_RELEASE_URL}"
         echo "-- Release upload URL : ${TEMP_RELEASE_UPLOAD_URL}"
         echo "-- Release assets     : ${TEMP_RELEASE_ASSETS}"
+        echo "-- Asset name         : ${ASSET_NAME}"
         echo "-- Asset download URL : ${TEMP_ASSET_DOWNLOAD_URL}"
       shell: bash
-      working-directory: _build/complete/_deploy
 
     - name: Sign the installer on Eclipse CI
-      if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && env.JENKINS_TOKEN != ''
+      if: env.IS_JENKINS_SIGNING_ENABLED == 'true'
       run: |
         export LC_CTYPE=en_US.utf8
 
@@ -116,7 +115,6 @@ jobs:
         JENKINS_BASE_URL="https://ci.eclipse.org/ecal/job/${JENKINS_JOB}"
         JENKINS_TRIGGER_URL="${JENKINS_BASE_URL}/buildWithParameters?token=${TOKEN}&GH_RELEASE_ID=${RELEASE_ID}&GH_ASSET_URL=${ASSET_URL}"
         JENKINS_STATUS_URL="${JENKINS_BASE_URL}/lastBuild/api/json"
-        #JENKINS_DOWNLOAD_URL="${JENKINS_BASE_URL}/lastSuccessfulBuild/artifact"
         WAIT_FOR_JENKINS_SEC=5
         STATUS_JSON=status.json
         NEW_BUILD=0
@@ -246,7 +244,7 @@ jobs:
         if [[ ${RESPONSE_CODE} -ge 200 && ${RESPONSE_CODE} -lt 300 ]]
         then
           echo "IS_DOWNLOAD_AVAILABLE=true" >> $GITHUB_ENV
-          printf -- "    ++ downloaded: '${ASSET_NAME}'\n"
+          printf -- "    ++ downloaded signed installer: '${ASSET_NAME}'\n"
         else
           echo "IS_DOWNLOAD_AVAILABLE=false" >> $GITHUB_ENV
           printf -- "    ** download failure\n"
@@ -254,12 +252,15 @@ jobs:
         fi
       shell: bash
       working-directory: _build/complete/_deploy
+      env:
+        JENKINS_TOKEN: ${{ secrets.jenkins_token }}      
 
     # https://github.com/dev-drprasad/delete-tag-and-release
-    # last release v0.2.0 gives Node.js 12 warnings 
-    # the HEAD commit below uses Node.js 16
+    # last release v0.2.0 gives Node v12 warnings 
+    # the commit below uses Node v16 and suppresses these warnings
     - name: Delete the temporary release
-      if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && env.JENKINS_TOKEN != ''
+      # always() calls the step even when action is cancelled
+      if: (success() || failure()) && env.IS_JENKINS_SIGNING_ENABLED == 'true'
       uses: dev-drprasad/delete-tag-and-release@92d94d77429cb0436597047a92369526a5824f50
       with:
         tag_name: ${{ env.TEMP_RELEASE_TAG }}
@@ -268,7 +269,7 @@ jobs:
 
     - name: Upload Windows setup signed on Eclipse CI
       if: env.IS_DOWNLOAD_AVAILABLE == 'true'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v3.1.2
       with:
         name: windows-setup-eclipse
         path: _build/complete/_deploy/${{ env.ASSET_NAME }}
