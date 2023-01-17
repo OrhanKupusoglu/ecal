@@ -378,7 +378,7 @@ jobs:
         Write-Output "-- Release URL        : $TEMP_RELEASE_URL"
         Write-Output "-- Release upload URL : $TEMP_RELEASE_UPLOAD_URL"
         Write-Output "-- Release assets     :" 
-        $TEMP_RELEASE_ASSETS | ConvertFrom-Json | ConvertTo-Json
+        "$TEMP_RELEASE_ASSETS" | ConvertFrom-Json | ConvertTo-Json
         Write-Output "-- Asset name         : $Env:ASSET_NAME"
         Write-Output "-- Asset download URL : $TEMP_ASSET_DOWNLOAD_URL"
 
