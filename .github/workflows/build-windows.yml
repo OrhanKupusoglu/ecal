@@ -403,7 +403,7 @@ jobs:
         $KEY_RESULT = 'result'
         $COUNTER = 0
 
-        Rename-Item -Path "$Env:ASSET_NAME" -NewName "$Env:ASSET_NAME_OLD" 
+        Rename-Item -Path "$Env:ASSET_NAME" -NewName "$ASSET_NAME_OLD" 
 
         Write-Output "-- trigger a new build with`r`n   release id     : $RELEASE_ID`r`n   download asset : $TEMP_ASSET_DOWNLOAD_URL`r`n   BASE64         : $ASSET_URL"
 
