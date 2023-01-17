@@ -293,7 +293,7 @@ jobs:
 
     - name: Detect certificate
       id: cert
-      if: env.IS_GITHUB_SIGNING_ALLOWED == 'false'
+      if: env.IS_GITHUB_SIGNING_ALLOWED == 'true'
       run: |
         if ($Env:CERT_BODY -and $Env:CERT_PSWD -and $Env:CERT_ALGO -and $Env:CERT_HASH) {
           Write-Output "ATTENTION: a certificate is available"
@@ -312,7 +312,7 @@ jobs:
 
     # https://github.com/OrhanKupusoglu/code-sign-action
     - name: Sign the installer
-      if: env.IS_GITHUB_SIGNING_ENABLED == 'true'
+      if: env.IS_GITHUB_SIGNING_ENABLED == 'false'
       uses: OrhanKupusoglu/code-sign-action@v5.5.1
       with:
         cert_body: ${{ secrets.CERT_BODY }}
