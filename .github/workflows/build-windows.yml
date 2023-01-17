@@ -354,7 +354,7 @@ jobs:
         target_commitish: ${{ env.GITHUB_SHA }}
         name: ${{ env.TEMP_RELEASE_NAME }}
         tag_name: ${{ env.TEMP_RELEASE_TAG }}
-        files: ${{ runner.workspace }}/_build/complete/_deploy/${{ env.ASSET_NAME }}
+        files: _build/complete/_deploy/${{ env.ASSET_NAME }}
 
     - name: Collect data about the temporary release
       if: env.IS_JENKINS_SIGNING_ENABLED == 'true'
@@ -425,7 +425,7 @@ jobs:
         while ($true) {
           $COUNTER++
 
-          if ($COUNTER -gt $COUNTER_LIMIT)) {
+          if ($COUNTER -gt $COUNTER_LIMIT) {
               Write-Output "    ** determination of the new build number failed after $$COUNTER_LIMIT tries" 
               Exit 1
           }
