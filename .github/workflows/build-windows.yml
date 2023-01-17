@@ -428,7 +428,7 @@ jobs:
           $COUNTER++
 
           if ($COUNTER -gt $COUNTER_LIMIT) {
-              Write-Output "    ** determination of the new build number failed after $$COUNTER_LIMIT tries" 
+              Write-Output "    ** determination of the new build number failed after $COUNTER_LIMIT tries" 
               Exit 1
           }
           
@@ -437,6 +437,8 @@ jobs:
           Write-Output "    ++ build number retrieval - HTTP status code: $RES_CODE"
 
           if ($RES_CODE -ge 200 -and $RES_CODE -lt 300) {
+            $RESPONSE
+            $RESPONSE.Content
             $JSON_CONTENT = $RESPONSE.Content | ConvertFrom-Json
             $NEW_BUILD = $JSON_CONTENT.$KEY_NUMBER
 
