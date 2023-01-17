@@ -287,6 +287,9 @@ jobs:
         Copy-Item -Path "ecal-5.11.0-win64.exe" -Destination "$Env:ROOT_DIR"
         pwd
         ls
+        cd "$Env:ROOT_DIR"
+        pwd
+        ls
       #working-directory: ${{ runner.workspace }}/_build/complete/_deploy
       env:
         ROOT_DIR: ${{ runner.workspace }}
