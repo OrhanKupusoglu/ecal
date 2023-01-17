@@ -363,7 +363,7 @@ jobs:
         $TEMP_RELEASE_URL = "${{ steps.temp_rel.outputs.url }}"
         $TEMP_RELEASE_ID = "${{ steps.temp_rel.outputs.id }}"
         $TEMP_RELEASE_UPLOAD_URL = "${{ steps.temp_rel.outputs.upload_url }}"
-        $TEMP_RELEASE_ASSETS = "${{ steps.temp_rel.outputs.assets }}"
+        $TEMP_RELEASE_ASSETS = ${{ steps.temp_rel.outputs.assets }}
         $TEMP_ASSET_DOWNLOAD_URL = "${{ fromJSON(steps.temp_rel.outputs.assets)[0].browser_download_url }}"
 
         Write-Output "TEMP_RELEASE_ID=$TEMP_RELEASE_ID" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
