@@ -272,6 +272,7 @@ jobs:
 
     - name: Create binaries
       run: |
+        echo "temporary test binary" > "ecal-5.11.0-win64.exe" 
         cd ..
         mkdir _build
         cd _build
@@ -354,7 +355,7 @@ jobs:
         target_commitish: ${{ env.GITHUB_SHA }}
         name: ${{ env.TEMP_RELEASE_NAME }}
         tag_name: ${{ env.TEMP_RELEASE_TAG }}
-        files: _build/complete/_deploy/${{ env.ASSET_NAME }}
+        files: ${{ env.ASSET_NAME }}
 
     - name: Collect data about the temporary release
       if: env.IS_JENKINS_SIGNING_ENABLED == 'true'
