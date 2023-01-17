@@ -387,8 +387,8 @@ jobs:
       run: |
         $ASSET_NAME_OLD = "$Env:ASSET_NAME.old"
         $JENKINS_JOB = 'gh_auto_release'
-        $TOKEN = "$JENKINS_TOKEN"
-        $RELEASE_ID = "$TEMP_RELEASE_ID"
+        $TOKEN = "$Env:JENKINS_TOKEN"
+        $RELEASE_ID = "$Env:TEMP_RELEASE_ID"
         $ENCODED_BYTES = [System.Text.Encoding]::UTF8.GetBytes($Env:TEMP_ASSET_DOWNLOAD_URL)
         $ASSET_URL = [System.Convert]::ToBase64String($ENCODED_BYTES)
         $JENKINS_BASE_URL = "https://ci.eclipse.org/ecal/job/$JENKINS_JOB"
@@ -405,7 +405,7 @@ jobs:
 
         Rename-Item -Path "$Env:ASSET_NAME" -NewName "$ASSET_NAME_OLD" 
 
-        Write-Output "-- trigger a new build with`r`n   release id     : $RELEASE_ID`r`n   download asset : $TEMP_ASSET_DOWNLOAD_URL`r`n   BASE64         : $ASSET_URL"
+        Write-Output "-- trigger a new build with`r`n   release id     : $RELEASE_ID`r`n   download asset : $Env:TEMP_ASSET_DOWNLOAD_URL`r`n   BASE64         : $ASSET_URL"
 
         $RESPONSE = Invoke-WebRequest -Method HEAD -Uri $JENKINS_TRIGGER_URL -UseBasicParsing
         $RES_CODE = $RESPONSE.StatusCode
@@ -488,7 +488,7 @@ jobs:
         }
 
         Write-Output "-- download the newly-signed Windows installer from #Build $NEW_BUILD"
-        JENKINS_DOWNLOAD_URL="${JENKINS_BASE_URL}/${NEW_BUILD}/artifact/$Env:ASSET_NAME"
+        $JENKINS_DOWNLOAD_URL = "$JENKINS_BASE_URL/$NEW_BUILD/artifact/$Env:ASSET_NAME"
         $RESPONSE = Invoke-WebRequest -Uri $JENKINS_DOWNLOAD_URL -OutFile $Env:ASSET_NAME
         $RES_CODE = $RESPONSE.StatusCode
         Write-Output "    ++ download installer - HTTP status code: $RESPONSE_CODE"
