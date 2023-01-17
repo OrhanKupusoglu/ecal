@@ -497,7 +497,7 @@ jobs:
         $JENKINS_DOWNLOAD_URL = "$JENKINS_BASE_URL/$BUILD_NUM/artifact/$Env:ASSET_NAME"
         Write-Output "-- download the newly-signed Windows installer from #Build $BUILD_NUM with $JENKINS_DOWNLOAD_URL"
 
-        $RESPONSE = Invoke-WebRequest -Uri $JENKINS_DOWNLOAD_URL -OutFile $ASSET_NAME_NEW
+        $RESPONSE = Invoke-WebRequest -Uri $JENKINS_DOWNLOAD_URL -OutFile $ASSET_NAME_NEW -PassThru
         $RES_CODE = $RESPONSE.StatusCode
         Write-Output "    ++ download installer - HTTP status code: $RESPONSE_CODE"
 
