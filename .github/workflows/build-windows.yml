@@ -457,7 +457,7 @@ jobs:
           }
         }
 
-        $JENKINS_STATUS_URL = "$BUILD_URL/api/json"
+        $JENKINS_STATUS_URL = "$($BUILD_URL)api/json"
         Write-Output "-- check build status of #Build $BUILD_NUM with $JENKINS_STATUS_URL"
 
         while ($true) {
@@ -475,7 +475,7 @@ jobs:
                 Start-Sleep -s $WAIT_FOR_JENKINS_SEC
               } else {
                 $RESULT = $CONTENT | Select-Object -expand $KEY_RESULT
-                if ($RESULT == 'SUCCESS') {
+                if ($RESULT -eq 'SUCCESS') {
                   Write-Output "    ++ build success, asset name: '$ASSET_NAME'"
                   Break
                 } else {
