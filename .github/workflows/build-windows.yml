@@ -286,7 +286,7 @@ jobs:
         echo "temporary test binary" > "ecal-5.11.0-win64.exe" 
         echo "temporary test binary" > "ecal-5.11.0-win64.whl" 
         echo "ROOT_DIR = $Env:ROOT_DIR"
-        Copy-Item -Path "ecal-5.11.0-win64.exe" -Destination "$Env:ROOT_DIR/ecal"
+        Copy-Item -Path "*.exe" -Destination "$Env:ROOT_DIR/ecal"
         pwd
         ls
         cd "$Env:ROOT_DIR"
