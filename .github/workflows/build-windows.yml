@@ -363,7 +363,8 @@ jobs:
         $TEMP_RELEASE_URL = "${{ steps.temp_rel.outputs.url }}"
         $TEMP_RELEASE_ID = "${{ steps.temp_rel.outputs.id }}"
         $TEMP_RELEASE_UPLOAD_URL = "${{ steps.temp_rel.outputs.upload_url }}"
-        $TEMP_RELEASE_ASSETS = "${{ steps.temp_rel.outputs.assets }}"
+        $TEMP_RELEASE_ASSETS = '${{ steps.temp_rel.outputs.assets }}'
+        $PRETTY_JSON = Write-Output "$TEMP_RELEASE_ASSETS" | ConvertFrom-Json | ConvertTo-Json
         $TEMP_ASSET_DOWNLOAD_URL = "${{ fromJSON(steps.temp_rel.outputs.assets)[0].browser_download_url }}"
 
         Write-Output "TEMP_RELEASE_ID=$TEMP_RELEASE_ID" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
@@ -377,8 +378,7 @@ jobs:
         Write-Output "-- Release tag        : $Env:TEMP_RELEASE_TAG"
         Write-Output "-- Release URL        : $TEMP_RELEASE_URL"
         Write-Output "-- Release upload URL : $TEMP_RELEASE_UPLOAD_URL"
-        Write-Output "-- Release assets     :" 
-        $TEMP_RELEASE_ASSETS | ConvertFrom-Json | ConvertTo-Json
+        Write-Output "-- Release assets     :`r`n$PRETTY_JSON" 
         Write-Output "-- Asset name         : $Env:ASSET_NAME"
         Write-Output "-- Asset download URL : $TEMP_ASSET_DOWNLOAD_URL"
 
