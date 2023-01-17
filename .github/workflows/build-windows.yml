@@ -270,9 +270,10 @@ jobs:
 #       run: cpack -C Release
 #       working-directory: ${{ runner.workspace }}/_build/complete
 
-    - name: Create binaries
+    # the release action can only reach to the root directory
+    - name: Copy Windows installer to the root directory
       run: |
-        echo "temporary test binary" > "ecal-5.11.0-win64.exe" 
+        #echo "temporary test binary" > "ecal-5.11.0-win64.exe" 
         cd ..
         mkdir _build
         cd _build
@@ -282,9 +283,13 @@ jobs:
         cd _deploy
         echo "temporary test binary" > "ecal-5.11.0-win64.exe" 
         echo "temporary test binary" > "ecal-5.11.0-win64.whl" 
+        echo "ROOT_DIR = $Env:ROOT_DIR"
+        Copy-Item -Path "ecal-5.11.0-win64.exe" -Destination "$Env:ROOT_DIR"
         pwd
         ls
-      shell: pwsh
+      #working-directory: ${{ runner.workspace }}/_build/complete/_deploy
+      env:
+        ROOT_DIR: ${{ runner.workspace }}
 
     - name: Detect certificate
       id: cert
