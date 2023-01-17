@@ -270,51 +270,6 @@ jobs:
 #       run: cpack -C Release
 #       working-directory: ${{ runner.workspace }}/_build/complete
 
-#     - name: Detect certificate
-#       id: cert
-#       if: env.IS_GITHUB_SIGNING_ALLOWED == 'true'
-#       run: |
-#         if ($CERT_BODY -and $CERT_PSWD -and $CERT_ALGO -and $CERT_HASH) {
-#           Write-Output "ATTENTION: a certificate is available"
-#           Write-Output "IS_GITHUB_SIGNING_ENABLED=true" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
-#         } else {
-#           Write-Output "WARNING: a certificate is not available"
-#         }
-#         $LS_OUT = ls *.exe
-#         Write-Output "ASSET_NAME=$($LS_OUT.Name)" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
-#       env:
-#         CERT_BODY: ${{ secrets.CERT_BODY }}
-#         CERT_PSWD: ${{ secrets.CERT_PSWD }}
-#         CERT_ALGO: ${{ secrets.CERT_ALGO }}
-#         CERT_HASH: ${{ secrets.CERT_HASH }}
-#       working-directory: ${{ runner.workspace }}/_build/complete/_deploy
-
-#     # https://github.com/OrhanKupusoglu/code-sign-action
-#     - name: Sign the installer
-#       if: env.IS_GITHUB_SIGNING_ENABLED == 'true'
-#       uses: OrhanKupusoglu/code-sign-action@v5.5.1
-#       with:
-#         cert_body: ${{ secrets.CERT_BODY }}
-#         cert_pswd: ${{ secrets.CERT_PSWD }}
-#         cert_algo: ${{ secrets.CERT_ALGO }}
-#         cert_hash: ${{ secrets.CERT_HASH }}
-#         folder: ${{ runner.workspace }}/_build/complete/_deploy
-#         debug: false
-
-#     - name: Upload Windows setup
-#       uses: actions/upload-artifact@v3.1.2
-#       with:
-#         name: windows-setup
-#         path: ${{ runner.workspace }}/_build/complete/_deploy/*.exe
-
-#     - name: Upload Python Wheels
-#       uses: actions/upload-artifact@v3.1.2
-#       with:
-#         name: windows-python-wheels
-#         path: ${{ runner.workspace }}/_build/complete/_deploy/*.whl
-
-    # --------------------------------------------------------------------------------------------------
-
     - name: Create binaries
       run: |
         cd ..
@@ -330,13 +285,56 @@ jobs:
         ls
       shell: pwsh
 
+    - name: Detect certificate
+      id: cert
+      if: env.IS_GITHUB_SIGNING_ALLOWED == 'true'
+      run: |
+        if ($CERT_BODY -and $CERT_PSWD -and $CERT_ALGO -and $CERT_HASH) {
+          Write-Output "ATTENTION: a certificate is available"
+          Write-Output "IS_GITHUB_SIGNING_ENABLED=true" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+        } else {
+          Write-Output "WARNING: a certificate is not available"
+        }
+        $LS_OUT = ls *.exe
+        Write-Output "ASSET_NAME=$($LS_OUT.Name)" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+      env:
+        CERT_BODY: ${{ secrets.CERT_BODY }}
+        CERT_PSWD: ${{ secrets.CERT_PSWD }}
+        CERT_ALGO: ${{ secrets.CERT_ALGO }}
+        CERT_HASH: ${{ secrets.CERT_HASH }}
+      working-directory: ${{ runner.workspace }}/_build/complete/_deploy
+
+    # https://github.com/OrhanKupusoglu/code-sign-action
+    - name: Sign the installer
+      if: env.IS_GITHUB_SIGNING_ENABLED == 'true'
+      uses: OrhanKupusoglu/code-sign-action@v5.5.1
+      with:
+        cert_body: ${{ secrets.CERT_BODY }}
+        cert_pswd: ${{ secrets.CERT_PSWD }}
+        cert_algo: ${{ secrets.CERT_ALGO }}
+        cert_hash: ${{ secrets.CERT_HASH }}
+        folder: ${{ runner.workspace }}/_build/complete/_deploy
+        debug: false
+
+    - name: Upload Windows setup
+      uses: actions/upload-artifact@v3.1.2
+      with:
+        name: windows-setup
+        path: ${{ runner.workspace }}/_build/complete/_deploy/*.exe
+
+    - name: Upload Python Wheels
+      uses: actions/upload-artifact@v3.1.2
+      with:
+        name: windows-python-wheels
+        path: ${{ runner.workspace }}/_build/complete/_deploy/*.whl
+
+    # --------------------------------------------------------------------------------------------------
+
     - name: Set var names for the temporary release
       if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && env.JENKINS_TOKEN != ''
       run: |
         $DATE_TIME = Get-Date -Format "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff"
-        echo $DATE_TIME
         $TAG_SUFFIX = $DATE_TIME -replace '-','_' -replace ':','_'
-        echo $TAG_SUFFIX
         Write-Output "TEMP_RELEASE_NAME=Temporary_Release_$DATE_TIME" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
         Write-Output "TEMP_RELEASE_TAG=temp_rel_$TAG_SUFFIX" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
         Write-Output "IS_JENKINS_SIGNING_ENABLED=true" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
