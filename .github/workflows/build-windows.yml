@@ -388,8 +388,8 @@ jobs:
 
         Write-Output "-- get a new token"
 
-        $RESPONSE = Invoke-WebRequest -Uri $JENKINS_CRUMB_URL -Method POST -Headers $HEADERS
-        #$RESPONSE = Invoke-RestMethod -Uri $JENKINS_TOKEN_URL -Method POST -Headers $HEADERS
+        #$RESPONSE = Invoke-WebRequest -Uri $JENKINS_CRUMB_URL -Method POST -Headers $HEADERS
+        $RESPONSE = Invoke-RestMethod -Uri $JENKINS_TOKEN_URL -Method POST -Headers $HEADERS
         $RES_CODE = $RESPONSE.StatusCode
         Write-Output "    ++ new token - HTTP status code: $RES_CODE"
         Write-Output "$RESPONSE"
