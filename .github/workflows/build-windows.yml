@@ -270,16 +270,18 @@ jobs:
 #       run: cpack -C Release
 #       working-directory: ${{ runner.workspace }}/_build/complete
 
-    - name: Downloaded installer from the last release 
+    - name: Download installer from the last release 
       run: |
         $PATH_DIRS = '_build/complete/_deploy'
         New-Item -ItemType Directory -Path $PATH_DIRS
         cd $PATH_DIRS
 
         $RELEASE_DOWNLOAD_URL = "https://github.com/eclipse-ecal/ecal/releases/download/v5.11.1/ecal_5.11.1-win64.exe"
+        $ASSET_NAME = $RELEASE_DOWNLOAD_URL.Split("/")[-1]
+        
         Write-Output "-- download released installer: $RELEASE_DOWNLOAD_URL"
 
-        $RESPONSE = Invoke-WebRequest -Uri $RELEASE_DOWNLOAD_URL -OutFile $ASSET_NAME_NEW -PassThru
+        $RESPONSE = Invoke-WebRequest -Uri $RELEASE_DOWNLOAD_URL -OutFile $ASSET_NAME -PassThru
         $RES_CODE = $RESPONSE.StatusCode
         Write-Output "    ++ download released installer - HTTP status code: $RES_CODE"
 
