@@ -372,7 +372,7 @@ jobs:
           $JSON_CONTENT = $RESPONSE.Content | ConvertFrom-Json
           $CRUMB_ID = $JSON_CONTENT.crumb
           $CRUMB_FIELD = $JSON_CONTENT.crumbRequestField
-          $CRUMB_COOKIE = $RESPONSE.Headers['set-cookie'][0]
+          $CRUMB_COOKIE = $RESPONSE.Headers['set-cookie']
           Write-Output "    ++ Jenkins crumb: '$CRUMB_ID', cookie: '$CRUMB_COOKIE'"
         } else {
           Write-Output "    ** determination of the Jenkins crumb failed"
