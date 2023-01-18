@@ -368,7 +368,7 @@ jobs:
 
         if ($RES_CODE -ge 200 -and $RES_CODE -lt 300) {
           $JSON_CONTENT = $RESPONSE.Content | ConvertFrom-Json
-          $CRUMB_ID = $JSON_CONTENT.$KEY_CRUMB
+          $CRUMB_ID = $JSON_CONTENT.crumb
           Write-Output "    ++ Jenkins crumb: $CRUMB_ID"
         } else {
           Write-Output "    ** determination of the Jenkins crumb failed"
