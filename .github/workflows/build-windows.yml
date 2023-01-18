@@ -376,6 +376,7 @@ jobs:
         }
 
         Write-Output "-- trigger a new build of '$JENKINS_JOB' with installer '$ASSET_NAME'"
+        Write-Output "Jenkins-Crumb = $CRUMB_ID"
 
         $HEADERS = @{
           'Jenkins-Crumb' = "$CRUMB_ID"
