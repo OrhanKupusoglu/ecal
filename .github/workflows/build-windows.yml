@@ -367,7 +367,13 @@ jobs:
 
         Write-Output "-- get a Jenkins crumb"
 
-        $RESPONSE = Invoke-WebRequest -Uri $JENKINS_CRUMB_URL -SessionVariable SESSION
+        $AUTH_CREDENTIAL = 'orhan.kupusoglu@gmail.com' + ':' + $API_TOKEN
+        $AUTH_ENCODED = [System.Text.Encoding]::UTF8.GetBytes($AUTH_CREDENTIAL)
+        $AUTH_INFO = [System.Convert]::ToBase64String($AUTH_ENCODED)
+        $AUTH_HEADERS = @{"Authorization"="Basic $($AUTH_INFO)"}
+
+        $RESPONSE = Invoke-WebRequest -Uri $JENKINS_CRUMB_URL -Method GET -Headers $AUTH_HEADERS
+
         $RES_CODE = $RESPONSE.StatusCode
         Write-Output "    ++ Jenkins crumb retrieval - HTTP status code: $RES_CODE"
 
@@ -382,7 +388,7 @@ jobs:
           Exit 1
         }
 
-        $HEADERS = @{
+        $SESS_HEADERS = @{
           $CRUMB_FIELD = $CRUMB_ID
           'Cookie' = $CRUMB_COOKIE
         }
@@ -416,7 +422,7 @@ jobs:
           'GH_FILE_NAME' = $ASSET_NAME
           'GH_EXECUTABLE' = Get-Item -Path $ASSET_NAME
         }
-        $RESPONSE = Invoke-RestMethod -Uri $JENKINS_TRIGGER_URL -Method POST -WebSession $SESSION -Headers $HEADERS -Form $FORM
+        $RESPONSE = Invoke-RestMethod -Uri $JENKINS_TRIGGER_URL -Method POST -WebSession $SESSION -Headers $AUTH_HEADERS -Headers $SESS_HEADERS -Form $FORM
         $RES_CODE = $RESPONSE.StatusCode
         Write-Output "    ++ trigger build - HTTP status code: $RES_CODE"
         $QUEUE_URL = ''
