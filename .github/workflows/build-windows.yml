@@ -411,11 +411,13 @@ jobs:
         $JENKINS_PASSWORD = ConvertTo-SecureString $API_TOKEN -AsPlainText -Force
         $JENKINS_CREDENTIAL = New-Object System.Management.Automation.PSCredential($JENKINS_USER, $JENKINS_PASSWORD)
 
+        Write-Output $JENKINS_CREDENTIAL
+
         $FORM = @{
           'GH_FILE_NAME' = $ASSET_NAME
           'GH_EXECUTABLE' = Get-Item -Path $ASSET_NAME
         }
-        $RESPONSE = Invoke-RestMethod -Uri $JENKINS_TRIGGER_URL -Method POST -Credential $JENKINS_CREDENTIAL -Headers $HEADERS -Form $FORM
+        $RESPONSE = Invoke-RestMethod -Uri $JENKINS_TRIGGER_URL -Method POST -Credential $JENKINS_CREDENTIAL -Form $FORM
         $RES_CODE = $RESPONSE.StatusCode
         Write-Output "    ++ trigger build - HTTP status code: $RES_CODE"
         $QUEUE_URL = ''
