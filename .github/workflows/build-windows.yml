@@ -358,6 +358,7 @@ jobs:
         $KEY_BUILDING = 'building'
         $KEY_RESULT = 'result'
         $CRUMB_ID = ''
+        $CRUMB_FIELD = ''
         $COUNTER = 0
 
         Write-Output "-- get a Jenkins crumb"
@@ -369,6 +370,7 @@ jobs:
         if ($RES_CODE -ge 200 -and $RES_CODE -lt 300) {
           $JSON_CONTENT = $RESPONSE.Content | ConvertFrom-Json
           $CRUMB_ID = $JSON_CONTENT.crumb
+          $CRUMB_FIELD = $JSON_CONTENT.crumbRequestField
           Write-Output "    ++ Jenkins crumb: $CRUMB_ID"
         } else {
           Write-Output "    ** determination of the Jenkins crumb failed"
@@ -379,13 +381,13 @@ jobs:
         Write-Output "Jenkins-Crumb = $CRUMB_ID"
 
         $HEADERS = @{
-          'Jenkins-Crumb' = "$CRUMB_ID"
+          "$CRUMB_FIELD" = "$CRUMB_ID"
         }
         $FORM = @{
-          GH_FILE_NAME = "$ASSET_NAME"
-          GH_EXECUTABLE = Get-Item -Path "$ASSET_NAME"
+          'GH_FILE_NAME' = "$ASSET_NAME"
+          'GH_EXECUTABLE' = Get-Item -Path "$ASSET_NAME"
         }
-        $RESPONSE = Invoke-RestMethod -Method POST -Headers $HEADERS -Form $FORM -Uri $JENKINS_TRIGGER_URL
+        $RESPONSE = Invoke-RestMethod -Uri $JENKINS_TRIGGER_URL -Method POST -Headers $HEADERS -Form $FORM
         $RES_CODE = $RESPONSE.StatusCode
         Write-Output "    ++ trigger build - HTTP status code: $RES_CODE"
         $QUEUE_URL = ''
