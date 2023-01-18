@@ -344,8 +344,10 @@ jobs:
         $ASSET_NAME_NEW = "$ASSET_NAME"
         $JENKINS_JOB = 'gh_auto_file'
         $TOKEN = "$Env:JENKINS_TOKEN"
-        $JENKINS_BASE_URL = "https://ci.eclipse.org/ecal/job/$JENKINS_JOB"
-        $JENKINS_TRIGGER_URL = "$JENKINS_BASE_URL/buildWithParameters?token=$TOKEN"
+        $JENKINS_BASE_URL = "https://ci.eclipse.org/ecal"
+        $JENKINS_CRUMB_URL = "$JENKINS_BASE_URL/crumbIssuer/api/json"
+        $JENKINS_JOB_URL = "$JENKINS_BASE_URL/job/$JENKINS_JOB"
+        $JENKINS_TRIGGER_URL = "$JENKINS_JOB_URL/buildWithParameters?token=$TOKEN"
         $WAIT_FOR_JENKINS_SEC = 5
         $COUNTER_LIMIT = 20
         $RESPONSE_CODE = 0
@@ -355,15 +357,34 @@ jobs:
         $KEY_URL = 'url'
         $KEY_BUILDING = 'building'
         $KEY_RESULT = 'result'
+        $CRUMB_ID = ''
         $COUNTER = 0
+
+        Write-Output "-- get a Jenkins crumb"
+
+        $RESPONSE = Invoke-WebRequest -Uri $JENKINS_CRUMB_URL
+        $RES_CODE = $RESPONSE.StatusCode
+        Write-Output "    ++ Jenkins crumb retrieval - HTTP status code: $RES_CODE"
+
+        if ($RES_CODE -ge 200 -and $RES_CODE -lt 300) {
+          $JSON_CONTENT = $RESPONSE.Content | ConvertFrom-Json
+          $CRUMB_ID = $JSON_CONTENT.$KEY_CRUMB
+          Write-Output "    ++ Jenkins crumb: $CRUMB_ID"
+        } else {
+          Write-Output "    ** determination of the Jenkins crumb failed"
+          Exit 1
+        }
 
         Write-Output "-- trigger a new build of '$JENKINS_JOB' with installer '$ASSET_NAME'"
 
-        $Form = @{
+        $HEADERS = @{
+          Jenkins-Crumb = $CRUMB_ID
+        }
+        $FORM = @{
           GH_FILE_NAME = $ASSET_NAME
           GH_EXECUTABLE = Get-Item -Path $ASSET_NAME
         }
-        $RESPONSE = Invoke-RestMethod -Method POST -Form $FORM -Uri $JENKINS_TRIGGER_URL
+        $RESPONSE = Invoke-RestMethod -Method POST -Headers $HEADERS -Form $FORM -Uri $JENKINS_TRIGGER_URL
         $RES_CODE = $RESPONSE.StatusCode
         Write-Output "    ++ trigger build - HTTP status code: $RES_CODE"
         $QUEUE_URL = ''
@@ -448,7 +469,7 @@ jobs:
           }
         }
 
-        $JENKINS_DOWNLOAD_URL = "$JENKINS_BASE_URL/$BUILD_NUM/artifact/$Env:ASSET_NAME"
+        $JENKINS_DOWNLOAD_URL = "$JENKINS_JOB_URL/$BUILD_NUM/artifact/$Env:ASSET_NAME"
         Write-Output "-- download the newly-signed Windows installer from #Build $BUILD_NUM with $JENKINS_DOWNLOAD_URL"
 
         Rename-Item -Path "$Env:ASSET_NAME" -NewName "$ASSET_NAME_OLD" 
