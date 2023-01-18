@@ -336,7 +336,7 @@ jobs:
     # --------------------------------------------------------------------------------------------------
 
     - name: Sign the installer on Eclipse CI
-      if: env.IS_JENKINS_SIGNING_ENABLED == 'true'
+      if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && env.JENKINS_TOKEN != ''
       run: |
         $LS_OUT = ls *.exe
         ASSET_NAME = "$($LS_OUT.Name)"
