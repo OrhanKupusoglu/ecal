@@ -291,6 +291,7 @@ jobs:
           Write-Output "    ** download failure"
           Exit 1
         }
+      working-directory: ${{ runner.workspace }}
 
     - name: Detect certificate
       id: cert
