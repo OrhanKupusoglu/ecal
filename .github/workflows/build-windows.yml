@@ -378,7 +378,7 @@ jobs:
         Write-Output "-- trigger a new build of '$JENKINS_JOB' with installer '$ASSET_NAME'"
 
         $HEADERS = @{
-          Jenkins-Crumb = $CRUMB_ID
+          'Jenkins-Crumb' = $CRUMB_ID
         }
         $FORM = @{
           GH_FILE_NAME = $ASSET_NAME
