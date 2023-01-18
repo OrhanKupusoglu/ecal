@@ -381,7 +381,7 @@ jobs:
         Write-Output "Jenkins-Crumb = $CRUMB_ID"
 
         $HEADERS = @{
-          "$CRUMB_FIELD" = "$CRUMB_ID"
+          "'$CRUMB_FIELD'" = "'$CRUMB_ID'"
         }
         $FORM = @{
           'GH_FILE_NAME' = "$ASSET_NAME"
