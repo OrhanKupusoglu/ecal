@@ -345,7 +345,9 @@ jobs:
         $JENKINS_JOB = 'gh_auto_file'
         $TOKEN = "$Env:JENKINS_TOKEN"
         $JENKINS_BASE_URL = "https://ci.eclipse.org/ecal"
-        $JENKINS_CRUMB_URL = "$JENKINS_BASE_URL/crumbIssuer/api/json"
+        $JENKINS_CRUMB_URL = "$JENKINS_BASE_URL/crumbIssuer/api/json?token=$TOKEN"
+        $TOKEN_NAME = 'eCAL-Token'
+        $JENKINS_TOKEN_URL = "$JENKINS_BASE_URL/user/admin/descriptorByName/jenkins.security.ApiTokenProperty/generateNewToken??token=$TOKEN&newTokenName=$TOKEN_NAME"
         $JENKINS_JOB_URL = "$JENKINS_BASE_URL/job/$JENKINS_JOB"
         $JENKINS_TRIGGER_URL = "$JENKINS_JOB_URL/buildWithParameters?token=$TOKEN"
         $WAIT_FOR_JENKINS_SEC = 5
@@ -385,9 +387,6 @@ jobs:
         }
 
         Write-Output "-- get a new token"
-
-        $TOKEN_NAME = 'eCAL-Token'
-        $JENKINS_TOKEN_URL = "$JENKINS_BASE_URL/user/admin/descriptorByName/jenkins.security.ApiTokenProperty/generateNewToken?newTokenName=$TOKEN_NAME"
 
         $RESPONSE = Invoke-WebRequest -Uri $JENKINS_CRUMB_URL -Method POST -Headers $HEADERS
         #$RESPONSE = Invoke-RestMethod -Uri $JENKINS_TOKEN_URL -Method POST -Headers $HEADERS
