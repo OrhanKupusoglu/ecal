@@ -365,27 +365,27 @@ jobs:
         $CRUMB_COOKIE = ''
         $COUNTER = 0
 
-        # Write-Output "-- get a Jenkins crumb"
+        Write-Output "-- get a Jenkins crumb"
 
-        # $RESPONSE = Invoke-WebRequest -Uri $JENKINS_CRUMB_URL
-        # $RES_CODE = $RESPONSE.StatusCode
-        # Write-Output "    ++ Jenkins crumb retrieval - HTTP status code: $RES_CODE"
+        $RESPONSE = Invoke-WebRequest -Uri $JENKINS_CRUMB_URL
+        $RES_CODE = $RESPONSE.StatusCode
+        Write-Output "    ++ Jenkins crumb retrieval - HTTP status code: $RES_CODE"
 
-        # if ($RES_CODE -ge 200 -and $RES_CODE -lt 300) {
-        #   $JSON_CONTENT = $RESPONSE.Content | ConvertFrom-Json
-        #   $CRUMB_ID = $JSON_CONTENT.crumb
-        #   $CRUMB_FIELD = $JSON_CONTENT.crumbRequestField
-        #   $CRUMB_COOKIE = $RESPONSE.Headers['Set-Cookie']
-        #   Write-Output "    ++ Jenkins crumb: '$CRUMB_ID', Cookie: '$CRUMB_COOKIE'"
-        # } else {
-        #   Write-Output "    ** determination of the Jenkins crumb failed"
-        #   Exit 1
-        # }
+        if ($RES_CODE -ge 200 -and $RES_CODE -lt 300) {
+          $JSON_CONTENT = $RESPONSE.Content | ConvertFrom-Json
+          $CRUMB_ID = $JSON_CONTENT.crumb
+          $CRUMB_FIELD = $JSON_CONTENT.crumbRequestField
+          $CRUMB_COOKIE = $RESPONSE.Headers['Set-Cookie']
+          Write-Output "    ++ Jenkins crumb: '$CRUMB_ID', Cookie: '$CRUMB_COOKIE'"
+        } else {
+          Write-Output "    ** determination of the Jenkins crumb failed"
+          Exit 1
+        }
 
-        # $HEADERS = @{
-        #   $CRUMB_FIELD = $CRUMB_ID
-        #   'Cookie' = $CRUMB_COOKIE
-        # }
+        $HEADERS = @{
+          $CRUMB_FIELD = $CRUMB_ID
+          'Cookie' = $CRUMB_COOKIE
+        }
 
         # Write-Output "-- get a new token"
 
@@ -417,7 +417,7 @@ jobs:
           'GH_FILE_NAME' = $ASSET_NAME
           'GH_EXECUTABLE' = Get-Item -Path $ASSET_NAME
         }
-        $RESPONSE = Invoke-RestMethod -Uri $JENKINS_TRIGGER_URL -Method POST -Credential $JENKINS_CREDENTIAL -Form $FORM
+        $RESPONSE = Invoke-RestMethod -Uri $JENKINS_TRIGGER_URL -Method POST -Credential $JENKINS_CREDENTIAL -Headers $HEADERS -Form $FORM
         $RES_CODE = $RESPONSE.StatusCode
         Write-Output "    ++ trigger build - HTTP status code: $RES_CODE"
         $QUEUE_URL = ''
