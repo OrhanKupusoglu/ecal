@@ -359,6 +359,7 @@ jobs:
         $KEY_RESULT = 'result'
         $CRUMB_ID = ''
         $CRUMB_FIELD = ''
+        $CRUMB_COOKIE = ''
         $COUNTER = 0
 
         Write-Output "-- get a Jenkins crumb"
@@ -371,21 +372,23 @@ jobs:
           $JSON_CONTENT = $RESPONSE.Content | ConvertFrom-Json
           $CRUMB_ID = $JSON_CONTENT.crumb
           $CRUMB_FIELD = $JSON_CONTENT.crumbRequestField
-          Write-Output "    ++ Jenkins crumb: $CRUMB_ID"
+          $CRUMB_COOKIE = $RESPONSE.Headers['set-cookie'][0]
+          Write-Output "    ++ Jenkins crumb: '$CRUMB_ID', cookie: '$CRUMB_COOKIE'"
         } else {
           Write-Output "    ** determination of the Jenkins crumb failed"
           Exit 1
         }
 
         Write-Output "-- trigger a new build of '$JENKINS_JOB' with installer '$ASSET_NAME'"
-        Write-Output "Jenkins-Crumb = $CRUMB_ID"
+        Write-Output "Jenkins-Crumb = $CRUMB_ID, '$CRUMB_COOKIE'"
 
         $HEADERS = @{
-          "'$CRUMB_FIELD'" = "'$CRUMB_ID'"
+          $CRUMB_FIELD = $CRUMB_ID
+          'Cookie' = $CRUMB_COOKIE
         }
         $FORM = @{
-          'GH_FILE_NAME' = "$ASSET_NAME"
-          'GH_EXECUTABLE' = Get-Item -Path "$ASSET_NAME"
+          'GH_FILE_NAME' = $ASSET_NAME
+          'GH_EXECUTABLE' = Get-Item -Path $ASSET_NAME
         }
         $RESPONSE = Invoke-RestMethod -Uri $JENKINS_TRIGGER_URL -Method POST -Headers $HEADERS -Form $FORM
         $RES_CODE = $RESPONSE.StatusCode
