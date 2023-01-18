@@ -406,6 +406,7 @@ jobs:
         # }
 
         Write-Output "-- trigger a new build of '$JENKINS_JOB' with installer '$ASSET_NAME'"
+        Write-Output $SESSION
 
         # $JENKINS_USER = 'orhan.kupusoglu@gmail.com'
         # $JENKINS_PASSWORD = ConvertTo-SecureString $API_TOKEN -AsPlainText -Force
@@ -415,7 +416,7 @@ jobs:
           'GH_FILE_NAME' = $ASSET_NAME
           'GH_EXECUTABLE' = Get-Item -Path $ASSET_NAME
         }
-        $RESPONSE = Invoke-RestMethod -Uri $JENKINS_TRIGGER_URL -Method POST -WebSession $SESSION -Form $FORM
+        $RESPONSE = Invoke-RestMethod -Uri $JENKINS_TRIGGER_URL -Method POST -WebSession $SESSION -Headers $HEADERS -Form $FORM
         $RES_CODE = $RESPONSE.StatusCode
         Write-Output "    ++ trigger build - HTTP status code: $RES_CODE"
         $QUEUE_URL = ''
