@@ -372,11 +372,12 @@ jobs:
         $AUTH_CREDENTIAL = 'orhan.kupusoglu@gmail.com' + ':' + $API_TOKEN
         $AUTH_ENCODED = [System.Text.Encoding]::UTF8.GetBytes($AUTH_CREDENTIAL)
         $AUTH_INFO = [System.Convert]::ToBase64String($AUTH_ENCODED)
-        $AUTH_HEADERS = @{
+        
+        $CRUMB_HEADERS = @{
           'Authorization'="Basic $($AUTH_INFO)"
         }
 
-        $RESPONSE = Invoke-WebRequest -Uri $JENKINS_CRUMB_URL -Method GET -Headers $AUTH_HEADERS
+        $RESPONSE = Invoke-WebRequest -Uri $JENKINS_CRUMB_URL -Method GET -Headers $CRUMB_HEADERS
 
         $RES_CODE = $RESPONSE.StatusCode
         Write-Output "    ++ Jenkins crumb retrieval - HTTP status code: $RES_CODE"
@@ -386,7 +387,8 @@ jobs:
           $CRUMB_ID = $JSON_CONTENT.crumb
           $CRUMB_FIELD = $JSON_CONTENT.crumbRequestField
           $CRUMB_COOKIE = $RESPONSE.Headers['Set-Cookie']
-          Write-Output "    ++ Jenkins crumb: '$CRUMB_ID', Cookie: '$CRUMB_COOKIE'"
+          Write-Output "    ++ Jenkins Crumb: '$CRUMB_ID'"
+          Write-Output "    ++ Jenkins Cookie: '$CRUMB_COOKIE'"
         } else {
           Write-Output "    ** determination of the Jenkins crumb failed"
           Exit 1
