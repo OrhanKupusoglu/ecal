@@ -387,8 +387,8 @@ jobs:
           $CRUMB_ID = $JSON_CONTENT.crumb
           $CRUMB_FIELD = $JSON_CONTENT.crumbRequestField
           $CRUMB_COOKIE = $RESPONSE.Headers['Set-Cookie']
-          Write-Output "    ++ Jenkins Crumb: '$CRUMB_ID'"
-          Write-Output "    ++ Jenkins Cookie: '$CRUMB_COOKIE'"
+          Write-Output "    ++ Jenkins crumb: '$CRUMB_ID'"
+          Write-Output "    ++ Jenkins cookie: '$CRUMB_COOKIE'"
         } else {
           Write-Output "    ** determination of the Jenkins crumb failed"
           Exit 1
@@ -472,7 +472,7 @@ jobs:
             if ($NUMBER -eq $BUILD_NUM) {
               $BUILDING = $CONTENT | Select-Object -expand $KEY_BUILDING
               if ($BUILDING) {
-                Write-Output "    ++ building ..., wait for $WAIT_FOR_JENKINS_SEC s"
+                Write-Output "    ++ ... building, wait for $WAIT_FOR_JENKINS_SEC s"
                 Start-Sleep -s $WAIT_FOR_JENKINS_SEC
               } else {
                 $RESULT = $CONTENT | Select-Object -expand $KEY_RESULT
