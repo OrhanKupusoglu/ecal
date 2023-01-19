@@ -394,39 +394,19 @@ jobs:
           'Cookie'=$CRUMB_COOKIE
         }
 
-        # Write-Output "-- get a new token"
-
-        # $RESPONSE = Invoke-WebRequest -Uri $JENKINS_TOKEN_URL -Method POST -Headers $HEADERS
-        # #$RESPONSE = Invoke-RestMethod -Uri $JENKINS_TOKEN_URL -Method POST -Headers $HEADERS
-        # $RES_CODE = $RESPONSE.StatusCode
-        # Write-Output "    ++ new token - HTTP status code: $RES_CODE"
-        # Write-Output "$RESPONSE"
-        # if ($RES_CODE -ge 200 -and $RES_CODE -lt 300) {
-        #   $JSON_CONTENT = $RESPONSE.Content | ConvertFrom-Json
-        #   $TOKEN_DATA = $JSON_CONTENT.data
-        #   $TOKEN_UUID = $TOKEN_DATA.tokenUuid
-        #   $TOKEN_VALUE = $TOKEN_DATA.tokenValue
-        #   Write-Output "    ++ Token - UUID: $TOKEN_UUID, value: $TOKEN_VALUE"
-        # } else {
-        #   Write-Output "    ** token failure"
-        #   Exit 1
-        # }
-
         Write-Output "-- trigger a new build of '$JENKINS_JOB' with installer '$ASSET_NAME'"
         Write-Output $SESSION
-
-        # $JENKINS_USER = 'orhan.kupusoglu@gmail.com'
-        # $JENKINS_PASSWORD = ConvertTo-SecureString $API_TOKEN -AsPlainText -Force
-        # $JENKINS_CREDENTIAL = New-Object System.Management.Automation.PSCredential($JENKINS_USER, $JENKINS_PASSWORD)
 
         $FORM = @{
           'GH_FILE_NAME'= $ASSET_NAME
           'GH_EXECUTABLE'= Get-Item -Path $ASSET_NAME
         }
+
         $RESPONSE = Invoke-RestMethod -Uri $JENKINS_TRIGGER_URL -Method POST -Headers $SESS_HEADERS -Form $FORM
-        Write-Output "$RESPONSE"
         $RES_CODE = $RESPONSE.StatusCode
         Write-Output "    ++ trigger build - HTTP status code: $RES_CODE"
+        $StatusCode = $_.Exception.Response.StatusCode
+        Write-Output "    ++ trigger build - HTTP status code: $StatusCode"
         $QUEUE_URL = ''
 
         if ($RES_CODE -ge 200 -and $RES_CODE -lt 300) {
