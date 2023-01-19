@@ -338,38 +338,34 @@ jobs:
     # --------------------------------------------------------------------------------------------------
 
     - name: Sign the installer on Eclipse CI
-      if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && env.JENKINS_JOB_TOKEN != '' && env.JENKINS_API_TOKEN != ''
+      if: env.IS_JENKINS_SIGNING_ALLOWED == 'true' && env.JENKINS_USERNAME != '' && env.JENKINS_API_TOKEN != '' && env.JENKINS_JOB_TOKEN != ''
       run: |
         $LS_OUT = ls *.exe
         $ASSET_NAME = "$($LS_OUT.Name)"
         $ASSET_NAME_OLD = "$($ASSET_NAME).old"
         $ASSET_NAME_NEW = "$ASSET_NAME"
         $JENKINS_JOB = 'gh_auto_file'
-        $JOB_TOKEN = "$Env:JENKINS_JOB_TOKEN"
-        $API_TOKEN = "$Env:JENKINS_API_TOKEN"
         $JENKINS_BASE_URL = "https://ci.eclipse.org/ecal"
         $JENKINS_CRUMB_URL = "$JENKINS_BASE_URL/crumbIssuer/api/json"
-        $TOKEN_NAME = 'eCAL-Token'
-        $JENKINS_TOKEN_URL = "$JENKINS_BASE_URL/user/admin/descriptorByName/jenkins.security.ApiTokenProperty/generateNewToken??token=$API_TOKEN&newTokenName=$TOKEN_NAME"
+        $TOKEN_NAME_NEW = 'eCAL-Token'
+        $JENKINS_TOKEN_URL = "$JENKINS_BASE_URL/user/admin/descriptorByName/jenkins.security.ApiTokenProperty/generateNewToken?token=$Env:JENKINS_API_TOKEN&newTokenName=$TOKEN_NAME_NEW"
         $JENKINS_JOB_URL = "$JENKINS_BASE_URL/job/$JENKINS_JOB"
-        $JENKINS_TRIGGER_URL = "$JENKINS_JOB_URL/buildWithParameters?token=$JOB_TOKEN"
+        $JENKINS_TRIGGER_URL = "$JENKINS_JOB_URL/buildWithParameters?token=$Env:JENKINS_JOB_TOKEN"
         $WAIT_FOR_JENKINS_SEC = 5
         $COUNTER_LIMIT = 20
         $RESPONSE_CODE = 0
         $QUEUE_URL = ''
-        $KEY_EXECUTABLE = 'executable'
-        $KEY_NUMBER = 'number'
-        $KEY_URL = 'url'
-        $KEY_BUILDING = 'building'
-        $KEY_RESULT = 'result'
         $CRUMB_ID = ''
         $CRUMB_FIELD = ''
         $CRUMB_COOKIE = ''
         $COUNTER = 0
+        $QUEUE_URL = ''
+        $BUILD_NUM = 0
+        $BUILD_URL = ''
 
-        Write-Output "-- get a Jenkins crumb"
+        Write-Output "-- get a Jenkins crumb & cookie"
 
-        $AUTH_CREDENTIAL = 'orhan.kupusoglu@gmail.com' + ':' + $API_TOKEN
+        $AUTH_CREDENTIAL = $Env:JENKINS_USERNAME + ':' + $Env:JENKINS_API_TOKEN
         $AUTH_ENCODED = [System.Text.Encoding]::UTF8.GetBytes($AUTH_CREDENTIAL)
         $AUTH_INFO = [System.Convert]::ToBase64String($AUTH_ENCODED)
         
@@ -394,25 +390,21 @@ jobs:
           Exit 1
         }
 
-        $SESS_HEADERS = @{
+        Write-Output "-- trigger a new build of '$JENKINS_JOB' with installer '$ASSET_NAME'"
+
+        $TRIGGER_HEADERS = @{
           'Authorization'="Basic $($AUTH_INFO)"
           'Cookie'=$CRUMB_COOKIE
           $CRUMB_FIELD=$CRUMB_ID
         }
-
-        Write-Output "-- trigger a new build of '$JENKINS_JOB' with installer '$ASSET_NAME'"
-        Write-Output $SESSION
-
         $FORM = @{
           'GH_FILE_NAME'= $ASSET_NAME
           'GH_EXECUTABLE'= Get-Item -Path $ASSET_NAME
         }
 
-        $RESPONSE = Invoke-WebRequest -Uri $JENKINS_TRIGGER_URL -Method POST -Headers $SESS_HEADERS -Form $FORM
+        $RESPONSE = Invoke-WebRequest -Uri $JENKINS_TRIGGER_URL -Method POST -Headers $TRIGGER_HEADERS -Form $FORM
         $RES_CODE = $RESPONSE.StatusCode
         Write-Output "    ++ trigger build - HTTP status code: $RES_CODE"
-
-        $QUEUE_URL = ''
 
         if ($RES_CODE -ge 200 -and $RES_CODE -lt 300) {
           $QUEUE_URL = $RESPONSE.Headers.location
@@ -424,8 +416,6 @@ jobs:
         }
 
         Write-Output "-- get the new build number"
-        $BUILD_NUM = 0
-        $BUILD_URL = ''
 
         while ($true) {
           $COUNTER++
@@ -441,12 +431,12 @@ jobs:
 
           if ($RES_CODE -ge 200 -and $RES_CODE -lt 300) {
             $JSON_CONTENT = $RESPONSE.Content | ConvertFrom-Json
-            $EXECUTABLE = $JSON_CONTENT.$KEY_EXECUTABLE
-            $BUILD_NUM = $EXECUTABLE.$KEY_NUMBER
+            $EXECUTABLE = $JSON_CONTENT['executable']
+            $BUILD_NUM = $EXECUTABLE['number']
 
             if ($BUILD_NUM) {
               Write-Output "    ++ #build number: $BUILD_NUM"
-              $BUILD_URL = $EXECUTABLE.$KEY_URL
+              $BUILD_URL = $EXECUTABLE['url']
               Break
             } else {
               Write-Output "    ++ ... pending, wait for $WAIT_FOR_JENKINS_SEC s"
@@ -468,14 +458,14 @@ jobs:
 
           if ($RES_CODE -ge 200 -and $RES_CODE -lt 300) {
             $CONTENT = ConvertFrom-Json $RESPONSE.Content
-            $NUMBER = $CONTENT | Select-Object -expand $KEY_NUMBER
+            $NUMBER = $CONTENT | Select-Object -expand 'number'
             if ($NUMBER -eq $BUILD_NUM) {
-              $BUILDING = $CONTENT | Select-Object -expand $KEY_BUILDING
+              $BUILDING = $CONTENT | Select-Object -expand 'building'
               if ($BUILDING) {
                 Write-Output "    ++ ... building, wait for $WAIT_FOR_JENKINS_SEC s"
                 Start-Sleep -s $WAIT_FOR_JENKINS_SEC
               } else {
-                $RESULT = $CONTENT | Select-Object -expand $KEY_RESULT
+                $RESULT = $CONTENT | Select-Object -expand 'result'
                 if ($RESULT -eq 'SUCCESS') {
                   Write-Output "    ++ build success, asset name: '$ASSET_NAME'"
                   Break
@@ -512,8 +502,9 @@ jobs:
           Exit 1
         }
       env:
-        JENKINS_JOB_TOKEN: ${{ secrets.JENKINS_TOKEN_GH_FILE }} 
+        JENKINS_USERNAME: ${{ secrets.JENKINS_USERNAME }}
         JENKINS_API_TOKEN: ${{ secrets.JENKINS_API_TOKEN }}  
+        JENKINS_JOB_TOKEN: ${{ secrets.JENKINS_TOKEN_GH_FILE }} 
       working-directory: ${{ runner.workspace }}/_build/complete/_deploy
 
     - name: Upload Windows setup signed on Eclipse CI
