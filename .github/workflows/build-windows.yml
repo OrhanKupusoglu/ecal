@@ -280,7 +280,8 @@ jobs:
         $RELEASE_DOWNLOAD_URL = 'https://github.com/eclipse-ecal/ecal/releases/download/v5.9.2/ecal_5.9.2-win64.exe'
         $ASSET_NAME = $RELEASE_DOWNLOAD_URL.Split("/")[-1]
         
-        Write-Output "`r`ndownload released installer: $RELEASE_DOWNLOAD_URL"
+        Write-Output
+        Write-Output "download released installer: $RELEASE_DOWNLOAD_URL"
 
         $RESPONSE = Invoke-WebRequest -Uri $RELEASE_DOWNLOAD_URL -OutFile $ASSET_NAME -PassThru
         $RES_CODE = $RESPONSE.StatusCode
@@ -371,7 +372,9 @@ jobs:
         $AUTH_CREDENTIAL = 'orhan.kupusoglu@gmail.com' + ':' + $API_TOKEN
         $AUTH_ENCODED = [System.Text.Encoding]::UTF8.GetBytes($AUTH_CREDENTIAL)
         $AUTH_INFO = [System.Convert]::ToBase64String($AUTH_ENCODED)
-        $AUTH_HEADERS = @{"Authorization"="Basic $($AUTH_INFO)"}
+        $AUTH_HEADERS = @{
+          'Authorization'="Basic $($AUTH_INFO)"
+        }
 
         $RESPONSE = Invoke-WebRequest -Uri $JENKINS_CRUMB_URL -Method GET -Headers $AUTH_HEADERS
 
@@ -391,8 +394,8 @@ jobs:
 
         $SESS_HEADERS = @{
           'Authorization'="Basic $($AUTH_INFO)"
-          $CRUMB_FIELD=$CRUMB_ID
           'Cookie'=$CRUMB_COOKIE
+          $CRUMB_FIELD=$CRUMB_ID
         }
 
         Write-Output "-- trigger a new build of '$JENKINS_JOB' with installer '$ASSET_NAME'"
@@ -489,7 +492,7 @@ jobs:
           }
         }
 
-        $JENKINS_DOWNLOAD_URL = "$JENKINS_JOB_URL/$BUILD_NUM/artifact/$Env:ASSET_NAME"
+        $JENKINS_DOWNLOAD_URL = "$JENKINS_JOB_URL/$BUILD_NUM/artifact/$ASSET_NAME"
         Write-Output "-- download the newly-signed Windows installer from #Build $BUILD_NUM with $JENKINS_DOWNLOAD_URL"
 
         Rename-Item -Path "$ASSET_NAME" -NewName "$ASSET_NAME_OLD" 
@@ -500,7 +503,7 @@ jobs:
 
         if ($RES_CODE -ge 200 -and $RES_CODE -lt 300) {
           Write-Output "IS_DOWNLOAD_AVAILABLE=true" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
-          Write-Output "    ++ downloaded signed installer: '$Env:ASSET_NAME'"
+          Write-Output "    ++ downloaded signed installer: '$ASSET_NAME'"
         } else {
           Write-Output "    ** download failure"
           Exit 1
