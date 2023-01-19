@@ -280,7 +280,7 @@ jobs:
         $RELEASE_DOWNLOAD_URL = 'https://github.com/eclipse-ecal/ecal/releases/download/v5.9.2/ecal_5.9.2-win64.exe'
         $ASSET_NAME = $RELEASE_DOWNLOAD_URL.Split("/")[-1]
         
-        Write-Output
+        Write-Output ''
         Write-Output "download released installer: $RELEASE_DOWNLOAD_URL"
 
         $RESPONSE = Invoke-WebRequest -Uri $RELEASE_DOWNLOAD_URL -OutFile $ASSET_NAME -PassThru
