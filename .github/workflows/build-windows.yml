@@ -431,12 +431,12 @@ jobs:
 
           if ($RES_CODE -ge 200 -and $RES_CODE -lt 300) {
             $JSON_CONTENT = $RESPONSE.Content | ConvertFrom-Json
-            $EXECUTABLE = $JSON_CONTENT['executable']
-            $BUILD_NUM = $EXECUTABLE['number']
+            $EXECUTABLE = $JSON_CONTENT.executable
+            $BUILD_NUM = $EXECUTABLE.number
 
             if ($BUILD_NUM) {
               Write-Output "    ++ #build number: $BUILD_NUM"
-              $BUILD_URL = $EXECUTABLE['url']
+              $BUILD_URL = $EXECUTABLE.url
               Break
             } else {
               Write-Output "    ++ ... pending, wait for $WAIT_FOR_JENKINS_SEC s"
