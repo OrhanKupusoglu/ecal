@@ -279,7 +279,7 @@ jobs:
         $RELEASE_DOWNLOAD_URL = "https://github.com/eclipse-ecal/ecal/releases/download/v5.11.1/ecal_5.11.1-win64.exe"
         $ASSET_NAME = $RELEASE_DOWNLOAD_URL.Split("/")[-1]
         
-        Write-Output "-- download released installer: $RELEASE_DOWNLOAD_URL"
+        Write-Output "`r`ndownload released installer: $RELEASE_DOWNLOAD_URL"
 
         $RESPONSE = Invoke-WebRequest -Uri $RELEASE_DOWNLOAD_URL -OutFile $ASSET_NAME -PassThru
         $RES_CODE = $RESPONSE.StatusCode
@@ -423,7 +423,8 @@ jobs:
           'GH_FILE_NAME'= $ASSET_NAME
           'GH_EXECUTABLE'= Get-Item -Path $ASSET_NAME
         }
-        $RESPONSE = Invoke-RestMethod -Uri $JENKINS_TRIGGER_URL -Method POST -Headers $SESS_HEADERS -Form $FORM -PassThru
+        $RESPONSE = Invoke-RestMethod -Uri $JENKINS_TRIGGER_URL -Method POST -Headers $SESS_HEADERS -Form $FORM
+        Write-Output "$RESPONSE"
         $RES_CODE = $RESPONSE.StatusCode
         Write-Output "    ++ trigger build - HTTP status code: $RES_CODE"
         $QUEUE_URL = ''
