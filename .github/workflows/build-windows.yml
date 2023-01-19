@@ -270,13 +270,14 @@ jobs:
 #       run: cpack -C Release
 #       working-directory: ${{ runner.workspace }}/_build/complete
 
-    - name: Download installer from the last release 
+    - name: Download installer from a release 
       run: |
         $PATH_DIRS = '_build/complete/_deploy'
         New-Item -ItemType Directory -Path $PATH_DIRS
         cd $PATH_DIRS
 
-        $RELEASE_DOWNLOAD_URL = "https://github.com/eclipse-ecal/ecal/releases/download/v5.11.1/ecal_5.11.1-win64.exe"
+        #$RELEASE_DOWNLOAD_URL = 'https://github.com/eclipse-ecal/ecal/releases/download/v5.11.1/ecal_5.11.1-win64.exe'
+        $RELEASE_DOWNLOAD_URL = 'https://github.com/eclipse-ecal/ecal/releases/download/v5.9.2/ecal_5.9.2-win64.exe'
         $ASSET_NAME = $RELEASE_DOWNLOAD_URL.Split("/")[-1]
         
         Write-Output "`r`ndownload released installer: $RELEASE_DOWNLOAD_URL"
@@ -491,7 +492,7 @@ jobs:
         $JENKINS_DOWNLOAD_URL = "$JENKINS_JOB_URL/$BUILD_NUM/artifact/$Env:ASSET_NAME"
         Write-Output "-- download the newly-signed Windows installer from #Build $BUILD_NUM with $JENKINS_DOWNLOAD_URL"
 
-        Rename-Item -Path "$Env:ASSET_NAME" -NewName "$ASSET_NAME_OLD" 
+        Rename-Item -Path "$ASSET_NAME" -NewName "$ASSET_NAME_OLD" 
 
         $RESPONSE = Invoke-WebRequest -Uri $JENKINS_DOWNLOAD_URL -OutFile $ASSET_NAME_NEW -PassThru
         $RES_CODE = $RESPONSE.StatusCode
