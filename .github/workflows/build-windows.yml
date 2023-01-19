@@ -423,7 +423,7 @@ jobs:
           'GH_FILE_NAME'= $ASSET_NAME
           'GH_EXECUTABLE'= Get-Item -Path $ASSET_NAME
         }
-        $RESPONSE = Invoke-RestMethod -Uri $JENKINS_TRIGGER_URL -Method POST -Headers $SESS_HEADERS -Form $FORM
+        $RESPONSE = Invoke-RestMethod -Uri $JENKINS_TRIGGER_URL -Method POST -Headers $SESS_HEADERS -Form $FORM -PassThru
         $RES_CODE = $RESPONSE.StatusCode
         Write-Output "    ++ trigger build - HTTP status code: $RES_CODE"
         $QUEUE_URL = ''
